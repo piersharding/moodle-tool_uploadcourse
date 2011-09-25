@@ -14,9 +14,15 @@ All the usual add,updated,rename, and delete functions.
 unpack this archive, and ensure that you have a:
 <moodle root>/admin/tools/uploadcourse directory.
 
-
 Point your browser at Moodle, and login as admin.  This should kick off
 the upgrade so that Moodle can now recognise the new plugin.
+
+This was inspired in part by a need for a complimentary function for uploading
+courses (as for users) for the the NZ MLE tools for Identity and 
+Access Managment (synchronising users with the School SMS):
+https://gitorious.org/pla-udi
+and
+https://gitorious.org/pla-udi/mle_ide_tools
 
 
 Copyright (C) Piers Harding 2011 and beyond, All rights reserved
