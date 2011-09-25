@@ -187,6 +187,18 @@ if ($formdata = $mform2->is_cancelled()) {
                 $upt->track($key, s($value), 'normal');
             }
         }
+        // validate category
+        if (!empty($course->category)) {
+                $category = $DB->get_record('course_categories', array('name'=>$course->category));
+                if (empty($category)) {
+                    $upt->track('status', get_string('invalidvalue', 'tool_uploadcourse', 'category'), 'error');
+                    $upt->track('category', $errorstr, 'error');
+                    $error = true;
+                }
+                else {
+                    $course->category = $category->id;
+                }
+        }
         if (!isset($course->shortname)) {
             // prevent warnings bellow
             $course->shortname = '';
@@ -211,8 +223,8 @@ if ($formdata = $mform2->is_cancelled()) {
                 continue;
             }
             // we require shortname too - we might use template for it though
-            if (empty($course->shortname) and !empty($formdata->shortname)) {
-                $course->shortname = cc_process_template($formdata->shortname, $course);
+            if (empty($course->shortname) and !empty($formdata->ccshortname)) {
+                $course->shortname = cc_process_template($formdata->ccshortname, $course);
                 $upt->track('shortname', s($course->shortname));
             }
         }
@@ -286,7 +298,9 @@ if ($formdata = $mform2->is_cancelled()) {
                 }
             }
         }
-        $course->category = $formdata->cccategory;
+        if (empty($course->category)) {
+            $course->category = $formdata->cccategory;
+        }
 
         // delete course
         if (!empty($course->deleted)) {

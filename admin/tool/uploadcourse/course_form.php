@@ -117,7 +117,7 @@ class admin_uploadcourse_form2 extends moodleform {
 
         $mform->addElement('selectyesno', 'ccstandardshortnames', get_string('ccstandardshortnames', 'tool_uploadcourse'));
         $mform->setDefault('ccstandardshortnames', 1);
-                
+
 //        $choices = array(CC_BULK_NONE    => get_string('no'),
 //                         CC_BULK_NEW     => get_string('ccbulknew', 'tool_uploadcourse'),
 //                         CC_BULK_UPDATED => get_string('ccbulkupdated', 'tool_uploadcourse'),
@@ -135,20 +135,20 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addHelpButton('cccategory', 'category');
 
         $mform->addElement('text', 'ccshortname', get_string('ccshortnametemplate', 'tool_uploadcourse'), 'maxlength="100" size="20"');
-        $mform->addHelpButton('ccshortname', 'shortnamecourse');
+        $mform->addHelpButton('ccshortname', 'shortnamecourse', 'tool_uploadcourse');
 //        $mform->addRule('ccshortname', get_string('requiredtemplate', 'tool_uploadcourse'), 'required', null, 'client');
         $mform->disabledIf('ccshortname', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
         $mform->disabledIf('ccshortname', 'cctype', 'eq', CC_COURSE_UPDATE);
 
-        $mform->addElement('text', 'ccfullname', get_string('ccfullnametemplate', 'tool_uploadcourse'), 'maxlength="254" size="50"');
-        $mform->addHelpButton('ccfullname', 'fullnamecourse');
-        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
-        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_UPDATE);
-        
-        $mform->addElement('text','ccidnumber', get_string('ccidnumbertemplate', 'tool_uploadcourse'),'maxlength="100"  size="10"');
-        $mform->addHelpButton('ccidnumber', 'idnumbercourse');
-        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
-        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_UPDATE);
+//        $mform->addElement('text', 'ccfullname', get_string('ccfullnametemplate', 'tool_uploadcourse'), 'maxlength="254" size="50"');
+//        $mform->addHelpButton('ccfullname', 'fullnamecourse');
+//        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
+//        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_UPDATE);
+//
+//        $mform->addElement('text','ccidnumber', get_string('ccidnumbertemplate', 'tool_uploadcourse'),'maxlength="100"  size="10"');
+//        $mform->addHelpButton('ccidnumber', 'idnumbercourse');
+//        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
+//        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_UPDATE);
         
         $courseformats = get_plugin_list('format');
         $formcourseformats = array();

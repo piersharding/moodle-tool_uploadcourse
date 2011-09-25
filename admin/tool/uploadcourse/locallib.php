@@ -267,11 +267,11 @@ function cc_process_template($template, $course) {
         return $template;
     }
 
-    $coursename  = isset($course->coursename)  ? $course->coursename  : '';
-    $firstname = isset($course->firstname) ? $course->firstname : '';
-    $lastname  = isset($course->lastname)  ? $course->lastname  : '';
+    $shortname  = isset($course->shortname) ? $course->shortname  : '';
+    $fullname   = isset($course->fullname) ? $course->fullname : '';
+    $idnumber   = isset($course->idnumber) ? $course->idnumber  : '';
 
-    $callback = partial('cc_process_template_callback', $coursename, $firstname, $lastname);
+    $callback = partial('cc_process_template_callback', $shortname, $fullname, $idnumber);
 
     $result = preg_replace_callback('/(?<!%)%([+-~])?(\d)*([flu])/', $callback, $t);
 
@@ -290,18 +290,18 @@ function cc_process_template($template, $course) {
 /**
  * Internal callback function.
  */
-function cc_process_template_callback($coursename, $firstname, $lastname, $block) {
+function cc_process_template_callback($shortname, $fullname, $idnumber, $block) {
     $textlib = textlib_get_instance();
 
     switch ($block[3]) {
-        case 'u':
-            $repl = $coursename;
+        case 's':
+            $repl = $shortname;
             break;
         case 'f':
-            $repl = $firstname;
+            $repl = $fullname;
             break;
-        case 'l':
-            $repl = $lastname;
+        case 'i':
+            $repl = $idnumber;
             break;
         default:
             return $block[0];
