@@ -24,7 +24,6 @@ https://gitorious.org/pla-udi
 and
 https://gitorious.org/pla-udi/mle_ide_tools
 
-
 Copyright (C) Piers Harding 2011 and beyond, All rights reserved
 
 moodle-tool_uploadcourse free software; you can redistribute it and/or
