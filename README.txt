@@ -11,6 +11,12 @@ with default parameter values.
 
 All the usual add,updated,rename, and delete functions.
 
+For category you must supply the category name as it is in Moodle and this
+field is case sensitive.
+
+For startdate and enrolstartdate, the values should be supplied in the form of
+31.01.2012 or 31/01/2012.
+
 unpack this archive, and ensure that you have a:
 <moodle root>/admin/tools/uploadcourse directory.
 
