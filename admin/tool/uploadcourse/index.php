@@ -203,6 +203,12 @@ if ($formdata = $mform2->is_cancelled()) {
             // prevent warnings bellow
             $course->shortname = '';
         }
+        if (!empty($course->startdate) && $course->startdate != 0) {
+            $course->startdate = strtotime($course->startdate);
+        }
+        if (!empty($course->enrolstartdate) && $course->enrolstartdate != 0) {
+            $course->enrolstartdate = strtotime($course->enrolstartdate);
+        }
 
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {
             // course creation is a special case - the shortname may be constructed from templates using firstname and lastname
