@@ -28,6 +28,9 @@ require('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/csvlib.class.php');
 require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+require_once($CFG->libdir . '/filelib.php');
 require_once('locallib.php');
 require_once('course_form.php');
 
@@ -39,7 +42,9 @@ raise_memory_limit(MEMORY_HUGE);
 
 require_login();
 admin_externalpage_setup('tooluploadcourse');
-require_capability('moodle/site:uploadusers', get_context_instance(CONTEXT_SYSTEM));
+require_capability('moodle/course:create', get_context_instance(CONTEXT_SYSTEM));
+require_capability('moodle/course:update', get_context_instance(CONTEXT_SYSTEM));
+require_capability('moodle/course:delete', get_context_instance(CONTEXT_SYSTEM));
 
 $strcourserenamed             = get_string('courserenamed', 'tool_uploadcourse');
 $strcoursenotrenamedexists    = get_string('coursenotrenamedexists', 'tool_uploadcourse');
@@ -77,6 +82,8 @@ $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
         'enrolenddate', 'notifystudents', 'expirynotify', 'expirythreshold',
         'deleted',     // 1 means delete course
         'oldshortname', // for renaming
+        'backupfile', // for restoring a course template after creation
+		'templatename', // course to use as a template - the shortname
     );
 
 
@@ -115,7 +122,8 @@ if (empty($iid)) {
     $filecolumns = cc_validate_course_upload_columns($cir, $STD_FIELDS, $returnurl);
 }
 
-$mform2 = new admin_uploadcourse_form2(null, array('columns'=>$filecolumns, 'data'=>array('iid'=>$iid, 'previewrows'=>$previewrows)));
+$frontpagecontext = context_course::instance(SITEID);
+$mform2 = new admin_uploadcourse_form2(null, array('contextid'=>$frontpagecontext->id, 'columns'=>$filecolumns, 'data'=>array('iid'=>$iid, 'previewrows'=>$previewrows)));
 
 // If a file has been uploaded, then process it
 if ($formdata = $mform2->is_cancelled()) {
@@ -134,6 +142,72 @@ if ($formdata = $mform2->is_cancelled()) {
     $allowdeletes      = (!empty($formdata->ccallowdeletes) and $optype != CC_COURSE_ADDNEW and $optype != CC_COURSE_ADDINC);
     $bulk              = isset($formdata->ccbulk) ? $formdata->ccbulk : 0;
     $standardshortnames = $formdata->ccstandardshortnames;
+
+    // check for the template
+    $templatepathname = null;
+    if (!empty($formdata->templatename) && $formdata->templatename != 'none') {
+        $template = $DB->get_record('course', array('shortname' => $formdata->templatename));
+
+        // backup the course template
+        $bc = new backup_controller(backup::TYPE_1COURSE, $template->id, backup::FORMAT_MOODLE,
+        backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
+        $backupid       = $bc->get_backupid();
+        $backupbasepath = $bc->get_plan()->get_basepath();
+        $bc->execute_plan();
+        $bc->destroy();
+        $packer = get_file_packer('application/zip');
+        // check if tmp dir exists
+        $tmpdir = $CFG->tempdir . '/backup';
+        if (!check_dir_exists($tmpdir, true, true)) {
+            throw new restore_controller_exception('cannot_create_backup_temp_dir');
+        }
+        $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
+        $templatepathname = $tmpdir . '/' . $filename;
+        // Get the list of files in directory
+        $filestemp = get_directory_list($backupbasepath, '', false, true, true);
+        $files = array();
+        foreach ($filestemp as $file) {
+            // Add zip paths and fs paths to all them
+            $files[$file] = $backupbasepath . '/' . $file;
+        }
+        $zippacker = get_file_packer('application/zip');
+        $zippacker->archive_to_pathname($files, $templatepathname);
+        if (empty($CFG->keeptempdirectoriesonbackup)) {
+            fulldelete($backupbasepath);
+        }
+    }
+
+    // check the uploaded backup file
+    $restorefile = null;
+    if (!empty($formdata->restorefile)) {
+        // check if tmp dir exists
+        $tmpdir = $CFG->tempdir . '/backup';
+        if (!check_dir_exists($tmpdir, true, true)) {
+            throw new restore_controller_exception('cannot_create_backup_temp_dir');
+        }
+        $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
+        $restorefile = $tmpdir . '/' . $filename;
+        if ($mform2->save_file('restorefile', $restorefile)) {
+            $filepath = restore_controller::get_tempdir_name(SITEID, $USER->id);
+            $packer = get_file_packer('application/zip');
+            $restorepathname = "$CFG->tempdir/backup/$filepath/";
+            $result = $packer->extract_to_pathname($restorefile, $restorepathname);
+            // if not a backup zip file
+            if (!$result) {
+                if (empty($CFG->keeptempdirectoriesonbackup)) {
+                    fulldelete($restorepathname);
+                    fulldelete($restorefile);
+                }
+                throw new moodle_exception('invalidbackupfile', 'tool_uploadcourse');
+            }
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($restorepathname);
+            }
+        }
+        else {
+            $restorefile = null;
+        }
+    }
 
     // verification moved to two places: after upload and into form2
     $coursesnew      = 0;
@@ -265,7 +339,7 @@ if ($formdata = $mform2->is_cancelled()) {
             }
             $existingcourse = false;
         }
-        
+
         // check duplicate idnumber
         if (!$existingcourse and isset($course->idnumber)) {
             if ($DB->record_exists('course', array('idnumber' => $course->idnumber))) {
@@ -405,10 +479,23 @@ if ($formdata = $mform2->is_cancelled()) {
                 $skip = true;
         }
 
+        // check for the backup file as template
+        $backupfile = null;
+        if (!empty($course->backupfile)) {
+            if (!is_readable($course->backupfile) || !preg_match('/\.mbz$/i', $course->backupfile)){
+                $upt->track('status', get_string('incorrecttemplatefile', 'tool_uploadcourse'), 'error');
+                $courseserrors++;
+                $skip = true;
+            }
+            else {
+                $backupfile = $course->backupfile;
+            }
+        }
+
         if ($skip) {
             continue;
         }
-        
+
 
         if ($existingcourse) {
             $course->id = $existingcourse->id;
@@ -512,8 +599,115 @@ if ($formdata = $mform2->is_cancelled()) {
             }
         }
 
+        // after creation/update, do we need to copy from template?
+        if (!empty($templatepathname)) {
+            // check if tmp dir exists
+            $tmpdir = $CFG->tempdir . '/backup';
+            $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
+            $pathname = $tmpdir . '/' . $filename;
+            $packer = get_file_packer('application/zip');
+            $packer->extract_to_pathname($templatepathname, $pathname);
 
+            // restore the backup immediately
+            $rc = new restore_controller($filename, $course->id,
+                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            if (!$rc->execute_precheck()) {
+                $precheckresults = $rc->get_precheck_results();
+                if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                    if (empty($CFG->keeptempdirectoriesonbackup)) {
+                        fulldelete($pathname);
+                    }
+                    echo $output->precheck_notices($precheckresults);
+                    echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $course->id)));
+                    echo $output->footer();
+                    die();
+                }
+            }
+            $rc->execute_plan();
+            $rc->destroy();
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($pathname);
+            }
+        }
+
+        // after creation/update, do we need to copy from template backup file?
+        if (!empty($restorefile)) {
+            // check if tmp dir exists
+            $tmpdir = $CFG->tempdir . '/backup';
+            $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
+            $pathname = $tmpdir . '/' . $filename;
+            $packer = get_file_packer('application/zip');
+            $packer->extract_to_pathname($restorefile, $pathname);
+
+            // restore the backup immediately
+            $rc = new restore_controller($filename, $course->id,
+                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            if (!$rc->execute_precheck()) {
+                $precheckresults = $rc->get_precheck_results();
+                if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                    if (empty($CFG->keeptempdirectoriesonbackup)) {
+                        fulldelete($pathname);
+                    }
+                    echo $output->precheck_notices($precheckresults);
+                    echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $course->id)));
+                    echo $output->footer();
+                    die();
+                }
+            }
+            $rc->execute_plan();
+            $rc->destroy();
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($pathname);
+            }
+        }
+
+        // after creation/update, do we need to import a Moodle backup?
+        if (!empty($backupfile)) {
+            // check if tmp dir exists
+            $tmpdir = $CFG->tempdir . '/backup';
+            if (!check_dir_exists($tmpdir, true, true)) {
+                throw new restore_controller_exception('cannot_create_backup_temp_dir');
+            }
+            $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
+            $pathname = $tmpdir . '/' . $filename;
+            $packer = get_file_packer('application/zip');
+            $packer->extract_to_pathname($backupfile, $pathname);
+
+            // restore the backup immediately
+            $rc = new restore_controller($filename, $course->id,
+                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            if (!$rc->execute_precheck()) {
+                $precheckresults = $rc->get_precheck_results();
+                if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                    if (empty($CFG->keeptempdirectoriesonbackup)) {
+                        fulldelete($pathname);
+                    }
+                    echo $output->precheck_notices($precheckresults);
+                    echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $course->id)));
+                    echo $output->footer();
+                    die();
+                }
+            }
+            $rc->execute_plan();
+            $rc->destroy();
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($pathname);
+            }
+        }
     }
+
+    // clean up backup files
+    if (!empty($template)) {
+        if (empty($CFG->keeptempdirectoriesonbackup)) {
+            fulldelete($backupbasepath);
+        }
+    }
+    if (!empty($restorefile)) {
+        if (empty($CFG->keeptempdirectoriesonbackup)) {
+            fulldelete($restorefile);
+        }
+    }
+
     $upt->close(); // close table
 
     $cir->close();

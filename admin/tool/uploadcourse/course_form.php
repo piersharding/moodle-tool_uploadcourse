@@ -76,7 +76,7 @@ class admin_uploadcourse_form1 extends moodleform {
  */
 class admin_uploadcourse_form2 extends moodleform {
     function definition () {
-        global $CFG, $COURSE;
+        global $CFG, $COURSE, $DB;
 
         $mform   = $this->_form;
         $columns = $this->_customdata['columns'];
@@ -149,7 +149,7 @@ class admin_uploadcourse_form2 extends moodleform {
 //        $mform->addHelpButton('ccidnumber', 'idnumbercourse');
 //        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
 //        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_UPDATE);
-        
+
         $courseformats = get_plugin_list('format');
         $formcourseformats = array();
         foreach ($courseformats as $courseformat => $formatdir) {
@@ -221,6 +221,18 @@ class admin_uploadcourse_form2 extends moodleform {
             }
             $mform->addElement('select', 'theme', get_string('forcetheme'), $themes);
         }
+        $courseshortnames = $DB->get_records('course', null, $sort='shortname', 'id,shortname,idnumber');
+        $formccourseshortnames = array('none' => get_string('none'));
+        foreach ($courseshortnames as $course) {
+            $formccourseshortnames[$course->shortname] = $course->shortname;
+        }
+        $mform->addElement('select', 'templatename', get_string('coursetemplatename', 'tool_uploadcourse'), $formccourseshortnames);
+        $mform->addHelpButton('templatename', 'coursetemplatename', 'tool_uploadcourse');
+        $mform->setDefault('templatename', 'none');
+
+        $contextid = $this->_customdata['contextid'];
+        $mform->addElement('hidden', 'contextid', $contextid);
+        $mform->addElement('filepicker', 'restorefile', get_string('templatefile', 'tool_uploadcourse'));
 
 //--------------------------------------------------------------------------------
         enrol_course_edit_form($mform, null, get_context_instance(CONTEXT_SYSTEM));
@@ -306,6 +318,8 @@ class admin_uploadcourse_form2 extends moodleform {
      * Server side validation.
      */
     function validation($data, $files) {
+        global $DB;
+
         $errors = parent::validation($data, $files);
         $columns = $this->_customdata['columns'];
         $optype  = $data['cctype'];
@@ -327,6 +341,11 @@ class admin_uploadcourse_form2 extends moodleform {
                     $errors['cctype'] .= ' ';
                 }
                 $errors['cctype'] .= get_string('missingfield', 'error', 'summary');
+            }
+        }
+        if (!empty($data['templatename']) && $data['templatename'] != 'none') {
+            if (!$template = $DB->get_record('course', array('shortname' => $data['templatename']))) {
+                $errors['templatename'] = get_string('missingtemplate', 'tool_uploadcourse');
             }
         }
 

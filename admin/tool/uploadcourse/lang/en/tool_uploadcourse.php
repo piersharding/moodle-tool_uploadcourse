@@ -109,3 +109,10 @@ $string['ccupdatetype'] = 'Existing course details';
 $string['ccshortnametemplate'] = 'Shortname template';
 $string['ccfullnametemplate'] = 'Fullname template';
 $string['ccidnumbertemplate'] = 'Idnumber template';
+$string['missingtemplate'] = 'Template not found';
+$string['incorrecttemplatefile'] = 'Template file not found';
+$string['coursetemplatename'] = 'Course template shortname';
+$string['coursetemplatename_help'] = 'Select an existing course shortname to use as a template for the creation of all courses.';
+$string['templatefile'] = 'Template backup file';
+$string['invalidbackupfile'] = 'Invalid backup file';
+

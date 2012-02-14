@@ -17,6 +17,14 @@ field is case sensitive.
 For startdate and enrolstartdate, the values should be supplied in the form of
 31.01.2012 or 31/01/2012.
 
+Course Templating
+=================
+add column backupfile which has the fully qualified path name to a file on
+the server that has a a Moodle course backup in it. 
+
+Add a column templatename which is the shortname of an existing course that 
+will be copied over the top of the new course.
+
 unpack this archive, and ensure that you have a:
 <moodle root>/admin/tools/uploadcourse directory.
 
