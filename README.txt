@@ -11,9 +11,33 @@ with default parameter values.
 
 All the usual add,updated,rename, and delete functions.
 
+CSV File format
+===============
+
+Possible column names are:
+fullname, shortname, category, idnumber, summary, format, showgrades,
+newsitems, teacher, teachers, student, students, startdate, numsections,
+maxbytes, visible, groupmode, enrolperiod, groupmodeforce, metacourse,
+lang, theme, cost, showreports, guest, enrollable, enrolstartdate,
+enrolenddate, notifystudents, expirynotify, expirythreshold,
+deleted,     // 1 means delete course
+oldshortname, // for renaming
+backupfile, // for restoring a course template after creation
+templatename, // course to use as a template - the shortname
+
+An example file is:
+
+fullname,shortname,category,idnumber,summary,backupfile
+Computer Science 101,CS101,Cat1,CS101,The first thing you will ever know,/path/to/backup-moodle2-course-cs101-20120213-0748-nu.mbz
+
+
+Category
+========
 For category you must supply the category name as it is in Moodle and this
 field is case sensitive.
 
+Startdate and Enrolstartdate
+============================
 For startdate and enrolstartdate, the values should be supplied in the form of
 31.01.2012 or 31/01/2012.
 
