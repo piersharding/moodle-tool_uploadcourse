@@ -75,8 +75,8 @@ $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today),
 
 // array of all valid fields for validation
 $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
-        'format', 'showgrades', 'newsitems', 'teacher', 'teachers', 'student',
-        'students', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode',
+        'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student',
+        'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode',
         'enrolperiod', 'groupmodeforce', 'metacourse', 'lang', 'theme',
         'cost', 'showreports', 'guest', 'enrollable', 'enrolstartdate',
         'enrolenddate', 'notifystudents', 'expirynotify', 'expirythreshold',
@@ -282,6 +282,16 @@ if ($formdata = $mform2->is_cancelled()) {
         }
         if (!empty($course->enrolstartdate) && $course->enrolstartdate != 0) {
             $course->enrolstartdate = strtotime($course->enrolstartdate);
+        }
+
+        // roles
+        $roles = get_all_roles();
+        foreach ($roles as $role) {
+            if (isset($course->{$role->shortname})) {
+                if (in_array($role->shortname, array('teacher', 'editingteacher', 'student', 'manager', 'coursecreator', 'guest', 'user'))) {
+                    $course->{'role_'.$role->id} = $course->{$role->shortname};
+                }
+            }
         }
 
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {

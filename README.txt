@@ -16,7 +16,8 @@ CSV File format
 
 Possible column names are:
 fullname, shortname, category, idnumber, summary, format, showgrades,
-newsitems, teacher, teachers, student, students, startdate, numsections,
+newsitems, 'teacher', 'editingteacher', 'student', 'manager',
+'coursecreator', 'guest', 'user', startdate, numsections,
 maxbytes, visible, groupmode, enrolperiod, groupmodeforce, metacourse,
 lang, theme, cost, showreports, guest, enrollable, enrolstartdate,
 enrolenddate, notifystudents, expirynotify, expirythreshold,
@@ -30,6 +31,11 @@ An example file is:
 fullname,shortname,category,idnumber,summary,backupfile
 Computer Science 101,CS101,Cat1,CS101,The first thing you will ever know,/path/to/backup-moodle2-course-cs101-20120213-0748-nu.mbz
 
+Role Names
+===========
+ 'teacher', 'editingteacher', 'student', 'manager',
+'coursecreator', 'guest', 'user' are - where config permitting - you can
+substitute your own name for these roles (string value).
 
 Category
 ========
