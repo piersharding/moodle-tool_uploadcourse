@@ -1,8 +1,10 @@
 moodle-tool_uploadcourse
 ========================
 
-Is a Moodle 2.x admin/tools plugin for uploading course outlines
+Is a Moodle admin/tools plugin for uploading course outlines
 in much the same way that admin/tools/uploaduser works for users.
+These plugins became available from Moodle 2.2x and onwards, as
+this is when the admin/tools framework first appeared.
 
 https://gitorious.org/moodle-tool_uploadcourse
 
@@ -40,7 +42,9 @@ substitute your own name for these roles (string value).
 Category
 ========
 For category you must supply the category name as it is in Moodle and this
-field is case sensitive.
+field is case sensitive.  If Sub Categories are involved then the full
+category hierarchy needs to be specified as a '/' delimited string eg:
+'Miscellaneous / Sub Cat / Sub Sub Cat'.
 
 Startdate and Enrolstartdate
 ============================

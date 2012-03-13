@@ -263,15 +263,19 @@ if ($formdata = $mform2->is_cancelled()) {
         }
         // validate category
         if (!empty($course->category)) {
-                $category = $DB->get_record('course_categories', array('name'=>$course->category));
+            $categories = explode('/', $course->category);
+            $course->category = 0;
+            foreach ($categories as $cat) {
+                // does the category exist - does the category hierachy make sense
+                $category = $DB->get_record('course_categories', array('name'=>trim($cat), 'parent' => $course->category));
                 if (empty($category)) {
                     $upt->track('status', get_string('invalidvalue', 'tool_uploadcourse', 'category'), 'error');
                     $upt->track('category', $errorstr, 'error');
                     $error = true;
+                    break;
                 }
-                else {
-                    $course->category = $category->id;
-                }
+                $course->category = $category->id;
+            }
         }
         if (!isset($course->shortname)) {
             // prevent warnings bellow
