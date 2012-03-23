@@ -59,8 +59,9 @@ the server that has a a Moodle course backup in it.
 Add a column templatename which is the shortname of an existing course that 
 will be copied over the top of the new course.
 
-unpack this archive, and ensure that you have a:
-<moodle root>/admin/tools/uploadcourse directory.
+Installation
+=================
+git clone this repository into <moodle root>/admin/tools/uploadcourse directory.
 
 Point your browser at Moodle, and login as admin.  This should kick off
 the upgrade so that Moodle can now recognise the new plugin.
