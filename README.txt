@@ -13,6 +13,30 @@ with default parameter values.
 
 All the usual add,updated,rename, and delete functions.
 
+!!!! NOTE !!!!
+===============
+
+This plugin used to come with the full directory structure
+admin/tool/uploadcourse - this is nolonger the case so the
+installation proceedure has changed!
+
+General installation proceedures are here:
+http://docs.moodle.org/20/en/Installing_contributed_modules_or_plugins
+
+The basic process is:
+Download https://gitorious.org/moodle-tool_uploadcourse/moodle-tool_uploadcourse/archive-tarball/master
+unpack the file (probably called master) with tar -xzvf master
+This will give you a directory called moodle-tool_uploadcourse-moodle-tool_uploadcourse
+Move this directory and rename it into it's final position:
+mv moodle-tool_uploadcourse-moodle-tool_uploadcourse <Moodle dirroot>/admin/tool/uploadcourse
+
+Alternatively you can use git:
+cd <Moodle dirroot>/admin/tool
+git clone git@gitorious.org:moodle-tool_uploadcourse/moodle-tool_uploadcourse.git uploadcourse
+
+Be careful about leaving the .git directory in your live environment.
+
+
 CSV File format
 ===============
 
