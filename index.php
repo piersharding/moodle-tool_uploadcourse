@@ -75,11 +75,10 @@ $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today),
 
 // array of all valid fields for validation
 $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
-        'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student',
-        'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode',
-        'enrolperiod', 'groupmodeforce', 'metacourse', 'lang', 'theme',
-        'cost', 'showreports', 'guest', 'enrollable', 'enrolstartdate',
-        'enrolenddate', 'notifystudents', 'expirynotify', 'expirythreshold',
+        'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student', 'modinfo',
+        'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode', 'restrictmodules',
+        'enablecompletion', 'completionstartonenrol', 'completionnotify', 'hiddensections', 'groupmodeforce', 'lang', 'theme',
+        'cost', 'showreports', 'notifystudents', 'expirynotify', 'expirythreshold', 'requested',
         'deleted',     // 1 means delete course
         'oldshortname', // for renaming
         'backupfile', // for restoring a course template after creation
