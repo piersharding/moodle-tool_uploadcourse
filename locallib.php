@@ -175,13 +175,11 @@ function cc_validate_course_upload_columns(csv_import_reader $cir, $stdfields, m
         print_error('csvfewcolumns', 'error', $returnurl);
     }
 
-    $textlib = textlib_get_instance(); // profile fields may contain unicode chars
-
     // test columns
     $processed = array();
     foreach ($columns as $key=>$unused) {
         $field = $columns[$key];
-        $lcfield = $textlib->strtolower($field);
+        $lcfield = textlib::strtolower($field);
         if (in_array($field, $stdfields) or in_array($lcfield, $stdfields)) {
             // standard fields are only lowercase
             $newfield = $lcfield;
@@ -291,7 +289,6 @@ function cc_process_template($template, $course) {
  * Internal callback function.
  */
 function cc_process_template_callback($shortname, $fullname, $idnumber, $block) {
-    $textlib = textlib_get_instance();
 
     switch ($block[3]) {
         case 's':
@@ -309,18 +306,18 @@ function cc_process_template_callback($shortname, $fullname, $idnumber, $block) 
 
     switch ($block[1]) {
         case '+':
-            $repl = $textlib->strtoupper($repl);
+            $repl = textlib::strtoupper($repl);
             break;
         case '-':
-            $repl = $textlib->strtolower($repl);
+            $repl = textlib::strtolower($repl);
             break;
         case '~':
-            $repl = $textlib->strtotitle($repl);
+            $repl = textlib::strtotitle($repl);
             break;
     }
 
     if (!empty($block[2])) {
-        $repl = $textlib->substr($repl, 0 , $block[2]);
+        $repl = textlib::substr($repl, 0 , $block[2]);
     }
 
     return $repl;

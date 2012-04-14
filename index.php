@@ -51,11 +51,11 @@ $strcoursenotrenamedexists    = get_string('coursenotrenamedexists', 'tool_uploa
 $strcoursenotrenamedmissing   = get_string('coursenotrenamedmissing', 'tool_uploadcourse');
 $strcoursenotrenamedoff       = get_string('coursenotrenamedoff', 'tool_uploadcourse');
 
-$strcourseupdated             = get_string('courseaccountupdated', 'tool_uploadcourse');
+$strcourseupdated             = get_string('courseupdated', 'tool_uploadcourse');
 $strcoursenotupdated          = get_string('coursenotupdatederror', 'tool_uploadcourse');
 $strcoursenotupdatednotexists = get_string('coursenotupdatednotexists', 'tool_uploadcourse');
 
-$strcourseuptodate            = get_string('courseaccountuptodate', 'tool_uploadcourse');
+$strcourseuptodate            = get_string('courseuptodate', 'tool_uploadcourse');
 
 $strcourseadded               = get_string('newcourse');
 $strcoursenotadded            = get_string('coursenotadded', 'tool_uploadcourse');
@@ -789,22 +789,6 @@ while ($linenum <= $previewrows and $fields = $cir->next()) {
         }
     } else {
         $rowcols['status'][] = get_string('missingshortname');
-    }
-
-    if (isset($rowcols['email'])) {
-        if (!validate_email($rowcols['email'])) {
-            $rowcols['status'][] = get_string('invalidemail');
-        }
-        if ($DB->record_exists('course', array('email'=>$rowcols['email']))) {
-            $rowcols['status'][] = $stremailduplicate;
-        }
-    }
-
-    if (isset($rowcols['city'])) {
-        $rowcols['city'] = trim($rowcols['city']);
-        if (empty($rowcols['city'])) {
-            $rowcols['status'][] = get_string('fieldrequired', 'error', 'city');
-        }
     }
 
     $rowcols['status'] = implode('<br />', $rowcols['status']);

@@ -8,6 +8,10 @@ this is when the admin/tools framework first appeared.
 
 https://gitorious.org/moodle-tool_uploadcourse
 
+There is also a bulk course category upload function available at https://gitorious.org/moodle-tool_uploadcoursecategory
+
+If you need to manage course enrolments via bulk upload then you should look at the core user upload facility - http://docs.moodle.org/22/en/Upload_users
+
 This takes CSV files as input and enables override or augmentation
 with default parameter values.
 

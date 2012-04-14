@@ -58,8 +58,8 @@ $string['uploadcourses_help'] = 'Courses may be uploaded (and optionally enrolle
 * Required fieldnames are coursename, password, firstname, lastname, email';
 $string['uploadcoursespreview'] = 'Upload courses preview';
 $string['uploadcoursesresult'] = 'Upload courses results';
-$string['courseaccountupdated'] = 'Course updated';
-$string['courseaccountuptodate'] = 'Course up-to-date';
+$string['courseupdated'] = 'Course updated';
+$string['courseuptodate'] = 'Course up-to-date';
 $string['coursedeleted'] = 'Course deleted';
 $string['courserenamed'] = 'Course renamed';
 $string['coursescreated'] = 'Courses created';
