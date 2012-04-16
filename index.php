@@ -261,6 +261,7 @@ if ($formdata = $mform2->is_cancelled()) {
             }
         }
         // validate category
+        $error = false;
         if (!empty($course->category)) {
             $categories = explode('/', $course->category);
             $course->category = 0;
@@ -276,6 +277,12 @@ if ($formdata = $mform2->is_cancelled()) {
                 $course->category = $category->id;
             }
         }
+        // check for category errors
+        if ($error) {
+            $courseserrors++;
+            continue;
+        }
+
         if (!isset($course->shortname)) {
             // prevent warnings bellow
             $course->shortname = '';
@@ -354,7 +361,7 @@ if ($formdata = $mform2->is_cancelled()) {
         }
 
         // check duplicate idnumber
-        if (!$existingcourse and isset($course->idnumber)) {
+        if (!$existingcourse and !empty($course->idnumber)) {
             if ($DB->record_exists('course', array('idnumber' => $course->idnumber))) {
                 $upt->track('status', get_string('idnumbernotunique', 'tool_uploadcourse'), 'error');
                 $upt->track('idnumber', $errorstr, 'error');
@@ -510,6 +517,7 @@ if ($formdata = $mform2->is_cancelled()) {
         }
 
 
+        $templatename = null;
         if ($existingcourse) {
             $course->id = $existingcourse->id;
 
@@ -585,6 +593,9 @@ if ($formdata = $mform2->is_cancelled()) {
 
 
             // create course - insert_record ignores any extra properties
+            if (isset($course->templatename)) {
+                $templatename = $course->templatename;
+            }
             try {
                 $course = create_course($course);
             }
@@ -609,6 +620,73 @@ if ($formdata = $mform2->is_cancelled()) {
                 if (!in_array($course->id, $SESSION->bulk_courses)) {
                     $SESSION->bulk_courses[] = $course->id;
                 }
+            }
+        }
+
+        // after creation/update, do we need to copy from template nominated in the CSV file?
+        $templatepathname = null;
+        if (!empty($templatename)) {
+            $coursetemplate = $DB->get_record('course', array('shortname' => $templatename));
+            if (empty($coursetemplate)) {
+                $upt->track('status', get_string('incorrecttemplatefile', 'tool_uploadcourse'), 'error');
+                $courseserrors++;
+                continue;
+            }
+
+            // backup the course template
+            $bc = new backup_controller(backup::TYPE_1COURSE, $coursetemplate->id, backup::FORMAT_MOODLE,
+                            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
+            $backupid       = $bc->get_backupid();
+            $backupbasepath = $bc->get_plan()->get_basepath();
+            $bc->execute_plan();
+            $bc->destroy();
+            $packer = get_file_packer('application/zip');
+            // check if tmp dir exists
+            $tmpdir = $CFG->tempdir . '/backup';
+            if (!check_dir_exists($tmpdir, true, true)) {
+                throw new restore_controller_exception('cannot_create_backup_temp_dir');
+            }
+            $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
+            $templatepathname = $tmpdir . '/' . $filename;
+            // Get the list of files in directory
+            $filestemp = get_directory_list($backupbasepath, '', false, true, true);
+            $files = array();
+            foreach ($filestemp as $file) {
+                // Add zip paths and fs paths to all them
+                $files[$file] = $backupbasepath . '/' . $file;
+            }
+            $zippacker = get_file_packer('application/zip');
+            $zippacker->archive_to_pathname($files, $templatepathname);
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($backupbasepath);
+            }
+
+            // check if tmp dir exists
+            $tmpdir = $CFG->tempdir . '/backup';
+            $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
+            $pathname = $tmpdir . '/' . $filename;
+            $packer = get_file_packer('application/zip');
+            $packer->extract_to_pathname($templatepathname, $pathname);
+
+            // restore the backup immediately
+            $rc = new restore_controller($filename, $course->id,
+                            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            if (!$rc->execute_precheck()) {
+                $precheckresults = $rc->get_precheck_results();
+                if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                    if (empty($CFG->keeptempdirectoriesonbackup)) {
+                        fulldelete($pathname);
+                    }
+                    echo $output->precheck_notices($precheckresults);
+                    echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $course->id)));
+                    echo $output->footer();
+                    die();
+                }
+            }
+            $rc->execute_plan();
+            $rc->destroy();
+            if (empty($CFG->keeptempdirectoriesonbackup)) {
+                fulldelete($pathname);
             }
         }
 
