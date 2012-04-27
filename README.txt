@@ -86,6 +86,24 @@ the server that has a a Moodle course backup in it.
 Add a column templatename which is the shortname of an existing course that 
 will be copied over the top of the new course.
 
+Course Enrolment Methods
+=========================
+
+Enrolment methods need special CSV columns as there can be many per course, and the fields for each 
+method are flexible.  The following is an example with two enrolment methods - manual, and self - firstly you need 
+the column identifying the enrolment method enrolmethod_<n>, and then add the corresponding field values subscripted with _<n>.
+eg:
+fullname,shortname,category,idnumber,summary,enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
+Parent,Parent,,Parent,Parent,manual,1,self,self1,letmein,this is a custom message 1
+Students,Students,,Students,Students,manual,0,self,self2,letmein,this is a custom message 2
+Teachers,Teachers,,Teachers,Teachers,manual,0,self,self3,letmein,this is a custom message 3
+
+add the special columns for:
+ * delete - delete_<n> with value 1
+ * disable - disable_<n> with value 1
+
+
+
 Installation
 =================
 git clone this repository into <moodle root>/admin/tools/uploadcourse directory.

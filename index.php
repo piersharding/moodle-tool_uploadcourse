@@ -83,6 +83,9 @@ $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
         'oldshortname', // for renaming
         'backupfile', // for restoring a course template after creation
 		'templatename', // course to use as a template - the shortname
+		// there are also the enrolment fields but these are free form as they vary on enrolment type
+        // eg: enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
+        //     manual,       1,       self,         self1, letmein,   this is a custom message 1
     );
 
 
@@ -218,12 +221,7 @@ if ($formdata = $mform2->is_cancelled()) {
     $renames       = 0;
     $renameerrors  = 0;
     $coursesskipped  = 0;
-    $weakpasswords = 0;
-
-    // caches
-    $ccache         = array(); // course cache - do not fetch all courses here, we  will not probably use them all anyway!
-    $cohorts        = array();
-    $manualcache    = array(); // cache of used manual enrol plugins in each course
+    $enrolmentplugins = enrol_get_plugins(false);
 
     // clear bulk selection
     if ($bulk) {
@@ -303,6 +301,35 @@ if ($formdata = $mform2->is_cancelled()) {
                 }
             }
         }
+
+        // check for enrolment methods
+        $line_fields = (array) $course;
+        $enrolmethods = array();
+        $enrolments = array();
+        $error = false;
+        foreach ($line_fields as $k => $v) {
+            if (preg_match('/^(\w+)\_(\d+)$/', $k, $matches)) {
+                if (!isset($enrolments[$matches[2]])) {
+                    $enrolments[$matches[2]] = array();
+                }
+                if ($matches[1] == 'enrolmethod') {
+                    if (!isset($enrolmentplugins[$v])) {
+                        $upt->track('status', get_string('invalidenrolmethod', 'tool_uploadcourse', 'category'), 'error');
+                        $upt->track($k, $errorstr, 'error');
+                        $error = true;
+                    }
+                    $enrolmethods[$v] = $matches[2];
+                }
+                $enrolments[$matches[2]][$matches[1]] = $v;
+            }
+        }
+        if ($error) {
+            continue;
+        }
+        foreach ($enrolmethods as $k => $v) {
+            $enrolmethods[$k] = $enrolments[$v];
+        }
+
 
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {
             // course creation is a special case - the shortname may be constructed from templates using firstname and lastname
@@ -593,8 +620,11 @@ if ($formdata = $mform2->is_cancelled()) {
 
 
             // create course - insert_record ignores any extra properties
-            if (isset($course->templatename)) {
+            if (isset($course->templatename) && $course->templatename != 'none') {
                 $templatename = $course->templatename;
+            }
+            else {
+                $templatename = null;
             }
             try {
                 $course = create_course($course);
@@ -785,6 +815,66 @@ if ($formdata = $mform2->is_cancelled()) {
                 fulldelete($pathname);
             }
         }
+
+        // handle enrolment methods
+        $enrol_updated = false;
+        $instances = enrol_get_instances($course->id, false);
+        foreach ($enrolments as $method) {
+            if (isset($method['delete']) && $method['delete']) {
+                // remove the enrolment method
+                foreach ($instances as $instance) {
+                    if ($instance->enrol == $method['enrolmethod']) {
+                        $plugin = $enrolmentplugins[$instance->enrol];
+                        $plugin->delete_instance($instance);
+                        $enrol_updated = true;
+                        break;
+                    }
+                }
+            }
+            else if (isset($method['disable']) && $method['disable']) {
+                // disable the enrolment
+                foreach ($instances as $instance) {
+                    if ($instance->enrol == $method['enrolmethod']) {
+                        $plugin = $enrolmentplugins[$instance->enrol];
+                        $plugin->update_status($instance, ENROL_INSTANCE_DISABLED);
+                        $enrol_updated = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                // we should have this enrolment method
+                $instance = null;
+                foreach ($instances as $i) {
+                    if ($i->enrol == $method['enrolmethod']) {
+                        $instance = $i;
+                        break;
+                    }
+                }
+                $plugin = null;
+                if (empty($instance)) {
+                    $plugin = $enrolmentplugins[$method['enrolmethod']];
+                    $instance = $plugin->add_default_instance($course);
+                }
+                else {
+                    $plugin = $enrolmentplugins[$instance->enrol];
+                    $plugin->update_status($instance, ENROL_INSTANCE_ENABLED);
+                }
+                // now update values
+                foreach ($method as $k => $v) {
+                    $instance->{$k} = $v;
+                }
+                $instance->status = ENROL_INSTANCE_ENABLED;
+                $DB->update_record('enrol', $instance);
+                $enrol_updated = true;
+            }
+        }
+    }
+    if ($enrol_updated) {
+        $coursesupdated++;
+        // invalidate all enrol caches
+        $context = context_course::instance($course->id);
+        $context->mark_dirty();
     }
 
     // clean up backup files

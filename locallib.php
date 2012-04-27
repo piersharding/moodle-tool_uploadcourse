@@ -184,7 +184,7 @@ function cc_validate_course_upload_columns(csv_import_reader $cir, $stdfields, m
             // standard fields are only lowercase
             $newfield = $lcfield;
 
-        } else if (preg_match('/^(cohort|course|group|type|role|enrolperiod)\d+$/', $lcfield)) {
+        } else if (preg_match('/^\w+\_\d+$/', $lcfield)) {
             // special fields for enrolments
             $newfield = $lcfield;
 
