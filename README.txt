@@ -73,11 +73,6 @@ field is case sensitive.  If Sub Categories are involved then the full
 category hierarchy needs to be specified as a '/' delimited string eg:
 'Miscellaneous / Sub Cat / Sub Sub Cat'.
 
-Startdate and Enrolstartdate
-============================
-For startdate and enrolstartdate, the values should be supplied in the form of
-31.01.2012 or 31/01/2012.
-
 Course Templating
 =================
 add column backupfile which has the fully qualified path name to a file on
@@ -102,6 +97,24 @@ add the special columns for:
  * delete - delete_<n> with value 1
  * disable - disable_<n> with value 1
 
+startdate enrol_startdate enrol_enddate
+=======================================
+For startdate enrolstartdate, and enrolenddate the values should be supplied in the form of
+31.01.2012 or 31/01/2012.
+
+Enrolment method field 'enrolperiod' must be in seconds.  If this is supplied then enrolenddate will be calculated
+as enrolstartdate + enrolperiod.
+
+enrolperiod should be supplied in multiples of enrolment period measurements - 1 hour = 3600, 1 day = 86400 and so on.
+
+Enrolment Method Role
+=====================
+Default Role for an enrolment method is supplied by adding the 'role_<n>' column.  The expected value is the
+descriptive label for the given role eg: 'Student', or "Teacher'.
+
+Enrolment example:
+fullname,shortname,category,idnumber,summary,enrolmethod_1,enrolperiod_1,role_1
+a name,short1,Miscellaneous,id1,a summary,manual,864000,Manager
 
 
 Installation

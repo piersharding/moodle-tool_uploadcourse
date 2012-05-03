@@ -855,6 +855,7 @@ if ($formdata = $mform2->is_cancelled()) {
                 if (empty($instance)) {
                     $plugin = $enrolmentplugins[$method['enrolmethod']];
                     $instance = $plugin->add_default_instance($course);
+                    $instance->roleid = $plugin->get_config('roleid');
                 }
                 else {
                     $plugin = $enrolmentplugins[$instance->enrol];
@@ -864,17 +865,55 @@ if ($formdata = $mform2->is_cancelled()) {
                 foreach ($method as $k => $v) {
                     $instance->{$k} = $v;
                 }
+
+                // sort out the start, end and date
+                if (isset($method['startdate'])) {
+                    $instance->enrolstartdate = strtotime($method['startdate']);
+                }
+                if (isset($method['enddate'])) {
+                    $instance->enrolenddate = strtotime($method['enddate']);
+                }
+
+                // is just the enrolment period set?
+                if ($instance->enrolstartdate = 0 && $instance->enrolenddate = 0) {
+                    if (isset($method['period'])) {
+                        $instance->enrolperiod = $method['period'];
+                    }
+                }
+                else {
+                    if ($instance->enrolstartdate > 0 && isset($method['period'])) {
+                        $instance->enrolenddate = $instance->enrolstartdate + $method['period'];
+                    }
+                    if ($instance->enrolenddate > 0) {
+                        $instance->enrolperiod = $instance->enrolenddate - $instance->enrolstartdate;
+                    }
+                    if ($instance->enrolenddate < $instance->enrolstartdate) {
+                        $instance->enrolenddate = $instance->enrolstartdate;
+                    }
+                }
+                // sort out the given Role
+                if (isset($method['role'])) {
+                    $context = context_course::instance($course->id);
+                    $roles = get_default_enrol_roles($context, $plugin->get_config('roleid'));
+                    if (!empty($roles)) {
+                        $roles = array_flip($roles);
+                    }
+                    if (isset($roles[$method['role']])) {
+                        $instance->roleid = $roles[$method['role']];
+                    }
+                }
                 $instance->status = ENROL_INSTANCE_ENABLED;
+                $instance->timemodified = time();
                 $DB->update_record('enrol', $instance);
                 $enrol_updated = true;
             }
         }
-    }
-    if ($enrol_updated) {
-        $coursesupdated++;
-        // invalidate all enrol caches
-        $context = context_course::instance($course->id);
-        $context->mark_dirty();
+        if ($enrol_updated) {
+            $coursesupdated++;
+            // invalidate all enrol caches
+            $context = context_course::instance($course->id);
+            $context->mark_dirty();
+        }
     }
 
     // clean up backup files
