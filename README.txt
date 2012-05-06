@@ -105,7 +105,8 @@ For startdate enrolstartdate, and enrolenddate the values should be supplied in 
 Enrolment method field 'enrolperiod' must be in seconds.  If this is supplied then enrolenddate will be calculated
 as enrolstartdate + enrolperiod.
 
-enrolperiod should be supplied in multiples of enrolment period measurements - 1 hour = 3600, 1 day = 86400 and so on.
+enrolperiod should be supplied in multiples of enrolment period measurements - 1 hour = 3600, 1 day = 86400 and so on. OR - you can pass a text string that
+php strtotime() can recognise eg: '2 weeks' or '10 days'
 
 Enrolment Method Role
 =====================

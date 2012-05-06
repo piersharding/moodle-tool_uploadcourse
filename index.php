@@ -75,18 +75,18 @@ $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today),
 
 // array of all valid fields for validation
 $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
-        'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student', 'modinfo',
-        'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode', 'restrictmodules',
-        'enablecompletion', 'completionstartonenrol', 'completionnotify', 'hiddensections', 'groupmodeforce', 'lang', 'theme',
-        'cost', 'showreports', 'notifystudents', 'expirynotify', 'expirythreshold', 'requested',
-        'deleted',     // 1 means delete course
-        'oldshortname', // for renaming
-        'backupfile', // for restoring a course template after creation
-		'templatename', // course to use as a template - the shortname
-		// there are also the enrolment fields but these are free form as they vary on enrolment type
-        // eg: enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
-        //     manual,       1,       self,         self1, letmein,   this is a custom message 1
-    );
+                'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student', 'modinfo',
+                'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode', 'restrictmodules',
+                'enablecompletion', 'completionstartonenrol', 'completionnotify', 'hiddensections', 'groupmodeforce', 'lang', 'theme',
+                'cost', 'showreports', 'notifystudents', 'expirynotify', 'expirythreshold', 'requested',
+                'deleted',     // 1 means delete course
+                'oldshortname', // for renaming
+                'backupfile', // for restoring a course template after creation
+                'templatename', // course to use as a template - the shortname
+                // there are also the enrolment fields but these are free form as they vary on enrolment type
+                // eg: enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
+                //     manual,       1,       self,         self1, letmein,   this is a custom message 1
+);
 
 
 if (empty($iid)) {
@@ -152,7 +152,7 @@ if ($formdata = $mform2->is_cancelled()) {
 
         // backup the course template
         $bc = new backup_controller(backup::TYPE_1COURSE, $template->id, backup::FORMAT_MOODLE,
-        backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
+                        backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
         $backupid       = $bc->get_backupid();
         $backupbasepath = $bc->get_plan()->get_basepath();
         $bc->execute_plan();
@@ -731,7 +731,7 @@ if ($formdata = $mform2->is_cancelled()) {
 
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
-                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+                            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -762,7 +762,7 @@ if ($formdata = $mform2->is_cancelled()) {
 
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
-                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+                            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -796,7 +796,7 @@ if ($formdata = $mform2->is_cancelled()) {
 
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
-                    backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+                            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -867,29 +867,28 @@ if ($formdata = $mform2->is_cancelled()) {
                 }
 
                 // sort out the start, end and date
-                if (isset($method['startdate'])) {
-                    $instance->enrolstartdate = strtotime($method['startdate']);
-                }
-                if (isset($method['enddate'])) {
-                    $instance->enrolenddate = strtotime($method['enddate']);
-                }
+                $instance->enrolstartdate = (isset($method['startdate']) ? strtotime($method['startdate']) : 0);
+                $instance->enrolenddate = (isset($method['enddate']) ? strtotime($method['enddate']) : 0);
 
-                // is just the enrolment period set?
-                if ($instance->enrolstartdate = 0 && $instance->enrolenddate = 0) {
-                    if (isset($method['period'])) {
-                        $instance->enrolperiod = $method['period'];
+                // is the enrolment period set?
+                if (isset($method['enrolperiod']) && ! empty($method['enrolperiod'])) {
+                    if (preg_match('/^\d+$/', $method['enrolperiod'])) {
+                        $method['enrolperiod'] = (int) $method['enrolperiod'];
                     }
+                    else {
+                        // try and convert period to seconds
+                        $method['enrolperiod'] = strtotime('1970-01-01 GMT + ' . $method['enrolperiod']);
+                    }
+                    $instance->enrolperiod = $method['enrolperiod'];
                 }
-                else {
-                    if ($instance->enrolstartdate > 0 && isset($method['period'])) {
-                        $instance->enrolenddate = $instance->enrolstartdate + $method['period'];
-                    }
-                    if ($instance->enrolenddate > 0) {
-                        $instance->enrolperiod = $instance->enrolenddate - $instance->enrolstartdate;
-                    }
-                    if ($instance->enrolenddate < $instance->enrolstartdate) {
-                        $instance->enrolenddate = $instance->enrolstartdate;
-                    }
+                if ($instance->enrolstartdate > 0 && isset($method['enrolperiod'])) {
+                    $instance->enrolenddate = $instance->enrolstartdate + $method['enrolperiod'];
+                }
+                if ($instance->enrolenddate > 0) {
+                    $instance->enrolperiod = $instance->enrolenddate - $instance->enrolstartdate;
+                }
+                if ($instance->enrolenddate < $instance->enrolstartdate) {
+                    $instance->enrolenddate = $instance->enrolstartdate;
                 }
                 // sort out the given Role
                 if (isset($method['role'])) {
