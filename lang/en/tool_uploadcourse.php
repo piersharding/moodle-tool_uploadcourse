@@ -24,6 +24,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['csvfileerror'] = 'There is something wrong with the format of the CSV file - please check the number of headings and columns match, and that the delimiter and file encoding are correct {$a}';
 $string['allowdeletes'] = 'Allow deletes';
 $string['allowrenames'] = 'Allow renames';
 $string['csvdelimiter'] = 'CSV delimiter';

@@ -102,7 +102,7 @@ if (empty($iid)) {
         unset($content);
 
         if ($readcount === false) {
-            print_error('csvloaderror', '', $returnurl);
+            print_error('csvfileerror', 'tool_uploadcourse', $returnurl);
         } else if ($readcount == 0) {
             print_error('csvemptyfile', 'error', $returnurl);
         }
