@@ -60,6 +60,12 @@ An example file is:
 fullname,shortname,category,idnumber,summary,backupfile
 Computer Science 101,CS101,Cat1,CS101,The first thing you will ever know,/path/to/backup-moodle2-course-cs101-20120213-0748-nu.mbz
 
+As a general rule, the input values for fields are what you find on the data entry form if you inspect the HTML element.
+
+Format
+======
+The options for the format value are 'scorm', 'social', weeks', and 'topics'.
+
 Role Names
 ===========
  'teacher', 'editingteacher', 'student', 'manager',

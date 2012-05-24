@@ -330,7 +330,6 @@ if ($formdata = $mform2->is_cancelled()) {
             $enrolmethods[$k] = $enrolments[$v];
         }
 
-
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {
             // course creation is a special case - the shortname may be constructed from templates using firstname and lastname
             // better never try this in mixed update types
@@ -654,7 +653,6 @@ if ($formdata = $mform2->is_cancelled()) {
         }
 
         // after creation/update, do we need to copy from template nominated in the CSV file?
-        $templatepathname = null;
         if (!empty($templatename)) {
             $coursetemplate = $DB->get_record('course', array('shortname' => $templatename));
             if (empty($coursetemplate)) {
@@ -677,7 +675,7 @@ if ($formdata = $mform2->is_cancelled()) {
                 throw new restore_controller_exception('cannot_create_backup_temp_dir');
             }
             $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
-            $templatepathname = $tmpdir . '/' . $filename;
+            $temppathname = $tmpdir . '/' . $filename;
             // Get the list of files in directory
             $filestemp = get_directory_list($backupbasepath, '', false, true, true);
             $files = array();
@@ -686,7 +684,7 @@ if ($formdata = $mform2->is_cancelled()) {
                 $files[$file] = $backupbasepath . '/' . $file;
             }
             $zippacker = get_file_packer('application/zip');
-            $zippacker->archive_to_pathname($files, $templatepathname);
+            $zippacker->archive_to_pathname($files, $temppathname);
             if (empty($CFG->keeptempdirectoriesonbackup)) {
                 fulldelete($backupbasepath);
             }
@@ -696,7 +694,7 @@ if ($formdata = $mform2->is_cancelled()) {
             $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
             $pathname = $tmpdir . '/' . $filename;
             $packer = get_file_packer('application/zip');
-            $packer->extract_to_pathname($templatepathname, $pathname);
+            $packer->extract_to_pathname($temppathname, $pathname);
 
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
