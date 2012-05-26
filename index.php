@@ -292,16 +292,6 @@ if ($formdata = $mform2->is_cancelled()) {
             $course->enrolstartdate = strtotime($course->enrolstartdate);
         }
 
-        // roles
-        $roles = get_all_roles();
-        foreach ($roles as $role) {
-            if (isset($course->{$role->shortname})) {
-                if (in_array($role->shortname, array('teacher', 'editingteacher', 'student', 'manager', 'coursecreator', 'guest', 'user'))) {
-                    $course->{'role_'.$role->id} = $course->{$role->shortname};
-                }
-            }
-        }
-
         // check for enrolment methods
         $line_fields = (array) $course;
         $enrolmethods = array();
@@ -330,6 +320,17 @@ if ($formdata = $mform2->is_cancelled()) {
             $enrolmethods[$k] = $enrolments[$v];
         }
 
+        // roles
+        $roles = get_all_roles();
+        foreach ($roles as $role) {
+            if (isset($course->{$role->shortname})) {
+                if (in_array($role->shortname, array('teacher', 'editingteacher', 'student', 'manager', 'coursecreator', 'guest', 'user'))) {
+                    $course->{'role_'.$role->id} = $course->{$role->shortname};
+                }
+            }
+        }
+
+        // what type of operation is this ?
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {
             // course creation is a special case - the shortname may be constructed from templates using firstname and lastname
             // better never try this in mixed update types
