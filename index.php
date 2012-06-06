@@ -529,7 +529,7 @@ if ($formdata = $mform2->is_cancelled()) {
         // check for the backup file as template
         $backupfile = null;
         if (!empty($course->backupfile)) {
-            if (!is_readable($course->backupfile) || !preg_match('/\.mbz$/i', $course->backupfile)){
+            if (!is_readable($course->backupfile) || !preg_match('/(\.mbz|\.zip)$/i', $course->backupfile)){
                 $upt->track('status', get_string('incorrecttemplatefile', 'tool_uploadcourse'), 'error');
                 $courseserrors++;
                 $skip = true;
