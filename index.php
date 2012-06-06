@@ -700,6 +700,10 @@ if ($formdata = $mform2->is_cancelled()) {
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            // check if the format conversion must happen first
+            if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
+                $rc->convert();
+            }
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -731,6 +735,10 @@ if ($formdata = $mform2->is_cancelled()) {
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            // check if the format conversion must happen first
+            if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
+                $rc->convert();
+            }
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -762,6 +770,10 @@ if ($formdata = $mform2->is_cancelled()) {
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            // check if the format conversion must happen first
+            if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
+                $rc->convert();
+            }
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -796,6 +808,10 @@ if ($formdata = $mform2->is_cancelled()) {
             // restore the backup immediately
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
+            // check if the format conversion must happen first
+            if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
+                $rc->convert();
+            }
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
