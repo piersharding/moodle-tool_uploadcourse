@@ -261,7 +261,12 @@ if ($formdata = $mform2->is_cancelled()) {
         // validate category
         $error = false;
         if (!empty($course->category)) {
-            $categories = explode('/', $course->category);
+            $split = preg_split('|(?<!\\\)/|', $course->category);
+            $categories = array();
+            foreach ($split as $cat) {
+                $cat = preg_replace('/\\\/', '', $cat);
+                $categories[]= $cat;
+            }
             $course->category = 0;
             foreach ($categories as $cat) {
                 // does the category exist - does the category hierachy make sense

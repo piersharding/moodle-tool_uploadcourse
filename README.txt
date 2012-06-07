@@ -77,7 +77,8 @@ Category
 For category you must supply the category name as it is in Moodle and this
 field is case sensitive.  If Sub Categories are involved then the full
 category hierarchy needs to be specified as a '/' delimited string eg:
-'Miscellaneous / Sub Cat / Sub Sub Cat'.
+'Miscellaneous / Sub Cat / Sub Sub Cat'.  The delimiter can be escaped with
+a back slash eg:  'some\/category'.
 
 Course Templating
 =================
