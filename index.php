@@ -102,9 +102,9 @@ if (empty($iid)) {
         unset($content);
 
         if ($readcount === false) {
-            print_error('csvfileerror', 'tool_uploadcourse', $returnurl);
+            print_error('csvfileerror', 'tool_uploadcourse', $returnurl, $cir->get_error());
         } else if ($readcount == 0) {
-            print_error('csvemptyfile', 'error', $returnurl);
+            print_error('csvemptyfile', 'error', $returnurl, $cir->get_error());
         }
         // test if columns ok
         $filecolumns = cc_validate_course_upload_columns($cir, $STD_FIELDS, $returnurl);
