@@ -124,6 +124,16 @@ Enrolment example:
 fullname,shortname,category,idnumber,summary,enrolmethod_1,enrolperiod_1,role_1
 a name,short1,Miscellaneous,id1,a summary,manual,864000,Manager
 
+Update Course:
+=================
+Make sure you have shortname in the csv. After uploading the file, select:
+Upload type: one of the update existing related options
+Existing course details: Overide with file 
+Allow Renames: Yes
+
+Update example:
+fullname,shortname
+new full name,short1
 
 Installation
 =================
