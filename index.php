@@ -929,10 +929,10 @@ if ($formdata = $mform2->is_cancelled()) {
         }
         if ($enrol_updated) {
             $coursesupdated++;
-            // invalidate all enrol caches
-            $context = context_course::instance($course->id);
-            $context->mark_dirty();
         }
+        // invalidate all enrol caches
+        $context = context_course::instance($course->id);
+        $context->mark_dirty();
     }
 
     // clean up backup files
@@ -951,6 +951,8 @@ if ($formdata = $mform2->is_cancelled()) {
 
     $cir->close();
     $cir->cleanup(true);
+    $systemcontext = context_system::instance();
+    mark_context_dirty($systemcontext->path);
 
     echo $OUTPUT->box_start('boxwidthnarrow boxaligncenter generalbox', 'uploadresults');
     echo '<p>';
