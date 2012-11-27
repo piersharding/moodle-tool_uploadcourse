@@ -17,6 +17,10 @@ with default parameter values.
 
 All the usual add,updated,rename, and delete functions.
 
+
+Thanks to Moshe Golden for help with getting the command line interface going.
+
+
 !!!! NOTE !!!!
 ===============
 
@@ -134,6 +138,31 @@ Allow Renames: Yes
 Update example:
 fullname,shortname
 new full name,short1
+
+
+Run it in batch mode
+=====================
+Execute Course Upload in batch mode - this must be run as the www-data user (or the equivalent user that the web server runs under).
+
+Options:
+-v, --verbose              Print verbose progress information
+-h, --help                 Print out this help
+-a, --action               Action to perform - addnew, addupdate, update, forceadd
+-m, --mode                 Mode of execution - delete, rename, nochange, file, filedefaults, missing
+-f, --file                 CSV File
+-d, --delimiter            delimiter - colon,semicolon,tab,cfg,comma
+-e, --encoding             File encoding - utf8 etc
+-c, --category             Course category
+-s, --templateshortname    Template course by shortname
+-t, --template             Template course by backup file
+-g, --format               Course format - weeks,scorm,social,topics
+-n, --numsections          Number of sections
+
+
+Example:
+sudo -u www-data /usr/bin/php admin/tool/uploadcourse/cli/uploadcourse.php --action=addupdate --mode=delete --file=./courses.csv --delimiter=comma
+
+
 
 Installation
 =================
