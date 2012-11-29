@@ -113,6 +113,10 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->disabledIf('ccallowdeletes', 'cctype', 'eq', CC_COURSE_ADDNEW);
         $mform->disabledIf('ccallowdeletes', 'cctype', 'eq', CC_COURSE_ADDINC);
 
+        $mform->addElement('selectyesno', 'reset', get_string('reset', 'tool_uploadcourse'));
+        $mform->setDefault('ccallowdeletes', 0);
+        $mform->disabledIf('ccallowdeletes', 'cctype', 'eq', CC_COURSE_ADDNEW);
+        $mform->disabledIf('ccallowdeletes', 'cctype', 'eq', CC_COURSE_ADDINC);
 
         $mform->addElement('selectyesno', 'ccstandardshortnames', get_string('ccstandardshortnames', 'tool_uploadcourse'));
         $mform->setDefault('ccstandardshortnames', 1);

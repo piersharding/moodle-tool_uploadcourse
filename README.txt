@@ -58,6 +58,7 @@ deleted,     // 1 means delete course
 oldshortname, // for renaming
 backupfile, // for restoring a course template after creation
 templatename, // course to use as a template - the shortname
+reset, // reset the course contents after upload
 
 An example file is:
 

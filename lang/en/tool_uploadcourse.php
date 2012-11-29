@@ -103,6 +103,7 @@ $string['ccoptype_update'] = 'Update existing courses only';
 $string['ccpasswordcron'] = 'Generated in cron';
 $string['ccpasswordnew'] = 'New course password';
 $string['ccpasswordold'] = 'Existing course password';
+$string['reset'] = 'Reset course after upload';
 $string['ccstandardshortnames'] = 'Standardise shortnames';
 $string['ccupdateall'] = 'Override with file and defaults';
 $string['ccupdatefromfile'] = 'Override with file';

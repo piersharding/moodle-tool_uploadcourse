@@ -59,6 +59,7 @@ list($options, $unrecognized) = cli_get_params(
                        'template' => false,
                        'format' => $courseconfig->format,
                        'numsections' => $courseconfig->numsections,
+                       'reset' => false,
                          ),
                  array('v' => 'verbose',
                        'h' => 'help',
@@ -72,6 +73,7 @@ list($options, $unrecognized) = cli_get_params(
                        't' => 'template',
                        'g' => 'format',
                        'n' => 'numsections',
+                       'r' => 'reset',
                         ));
 
 if ($unrecognized) {
@@ -95,6 +97,7 @@ Options:
 -t, --template             Template course by backup file
 -g, --format               Course format - weeks,scorm,social,topics
 -n, --numsections          Number of sections
+-r, --reset                Run the course reset by default after each course import
 
 
 Example:

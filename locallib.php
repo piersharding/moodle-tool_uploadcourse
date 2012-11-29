@@ -56,6 +56,7 @@ function cc_std_fields() {
                     'oldshortname', // for renaming
                     'backupfile', // for restoring a course template after creation
                     'templatename', // course to use as a template - the shortname
+                    'reset',
                     // there are also the enrolment fields but these are free form as they vary on enrolment type
                     // eg: enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
                     //     manual,       1,       self,         self1, letmein,   this is a custom message 1
@@ -399,6 +400,13 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 }
             }
         }
+        // do we run the reset ?
+        $resetcourse = false;
+        if ($course->reset) {
+            $resetcourse = true;
+            unset($course->reset);
+        }
+
         if (empty($course->category)) {
             $course->category = $formdata->cccategory;
         }
@@ -904,6 +912,37 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 $enrol_updated = true;
             }
         }
+
+        // do the course reset
+        if ($resetcourse) {
+            $resetdata = new stdClass();
+            $resetdata->reset_start_date = time();
+            $resetdata->id = $course->id;
+            $resetdata->reset_events = true;
+            $resetdata->reset_logs = true;
+            $resetdata->reset_notes = true;
+            $resetdata->reset_comments = true;
+            $resetdata->reset_completion = true;
+            $resetdata->delete_blog_associations = true;
+            $roles = get_assignable_roles(context_course::instance($course->id));
+            $roles[0] = get_string('noroles', 'role');
+            $roles = array_reverse($roles, true);
+//             $resetdata->unenrol_users = $roles;
+//             $resetdata->reset_roles_overrides = true;
+            $resetdata->reset_roles_local = true;
+            $resetdata->reset_gradebook_items = true;
+            $resetdata->reset_gradebook_grades = true;
+            $resetdata->reset_gradebook_items = true;
+            $resetdata->reset_groups_remove = true;
+            $resetdata->reset_groups_members = true;
+            $resetdata->reset_groupings_remove = true;
+            $resetdata->reset_groupings_members = true;
+            $resetdata->reset_groups_remove = true;
+            $resetdata->reset_groups_remove = true;
+            $resetdata->reset_start_date_old = $course->startdate;
+            $status = reset_course_userdata($resetdata);
+        }
+
         if ($enrol_updated) {
             $coursesupdated++;
         }
