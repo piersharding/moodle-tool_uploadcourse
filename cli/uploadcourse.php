@@ -17,7 +17,7 @@
 /**
  * CLI Bulk course registration script from a comma separated file
  *
- * @package    tool
+ * @package    tool_uploadcourse
  * @subpackage uploadcourse
  * @copyright  2004 onwards Martin Dougiamas (http://dougiamas.com)
  * @copyright  2012 Piers Harding

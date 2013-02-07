@@ -17,7 +17,7 @@
 /**
  * Bulk course registration functions
  *
- * @package    tool
+ * @package    tool_uploadcourse
  * @subpackage uploadcourse
  * @copyright  2004 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -45,6 +45,9 @@ define('CC_PWRESET_ALL', 2);
 define('CC_BULK_NONE', 0);
 
 
+/**
+ * Return the list of stad fields the course upload processes
+ */
 function cc_std_fields() {
     // Array of all valid fields for validation.
     return $std_fields = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
@@ -68,8 +71,12 @@ function cc_std_fields() {
 /**
  * process the upload
  *
+ * @param object $formdata - object of the form data 
+ * @param object $cir - object of the CSV importer
+ * @param array $filecolumns - file column definitions
+ * @param string $restorefile - file to restore from
+ * @param boolean $plain - plain text output
  */
-
 function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=null, $plain=false) {
     global $CFG, $USER, $OUTPUT, $SESSION, $DB;
 
@@ -1011,14 +1018,15 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
  *
  * This class prints course information into a html table.
  *
- * @package    core
- * @subpackage admin
  * @copyright  2007 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cc_progress_tracker {
+    /** @var int $_row - row marker */
     private $_row;
+    /** @var array $columns - output columns */
     public $columns = array('status', 'line', 'id', 'fullname', 'shortname', 'category', 'idnumber', 'summary', 'deleted');
+    /** @var boolean $_plain - output is text mode */
     private $_plain;
 
     /**
@@ -1230,9 +1238,10 @@ function cc_increment_idnumber($idnumber) {
 
 /**
  * Check if default field contains templates and apply them.
- * @param string template - potential tempalte string
- * @param object course object- we need coursename, firstname and lastname
- * @return string field value
+ * @param string $template - potential tempalte string
+ * @param object $course - we need coursename, firstname and lastname
+ * @return object $template - course template
+ * @return string $result - field value
  */
 function cc_process_template($template, $course) {
     if (is_array($template)) {
@@ -1267,6 +1276,11 @@ function cc_process_template($template, $course) {
 
 /**
  * Internal callback function.
+ * @param string $shortname - course shortname
+ * @param string $fullname - course full name
+ * @param string $idnumber - course idnumber
+ * @param array $block - template parameters
+ * @return string $repl - resolved template
  */
 function cc_process_template_callback($shortname, $fullname, $idnumber, $block) {
 

@@ -17,7 +17,7 @@
 /**
  * Strings for component 'tool_uploadcourse', language 'en', branch 'MOODLE_22_STABLE'
  *
- * @package    tool
+ * @package    tool_uploadcourse
  * @subpackage uploadcourse
  * @copyright  2011 Petr Skoda {@link http://skodak.org}
  * @copyright  2011 Piers Harding

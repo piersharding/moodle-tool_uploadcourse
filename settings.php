@@ -17,7 +17,7 @@
 /**
  * Link to CSV course upload
  *
- * @package    tool
+ * @package    tool_uploadcourse
  * @subpackage uploadcourse
  * @copyright  2010 Petr Skoda {@link http://skodak.org}
  * @copyright  2011 Piers Harding

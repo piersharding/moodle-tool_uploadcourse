@@ -17,7 +17,7 @@
 /**
  * Bulk course upload forms
  *
- * @package    tool
+ * @package    tool_uploadcourse
  * @subpackage uploadcourse
  * @copyright  2007 Dan Poltawski
  * @copyright  2011 Piers Harding
@@ -36,6 +36,10 @@ require_once($CFG->libdir.'/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_uploadcourse_form1 extends moodleform {
+    /**
+     * The standard form definiton
+     * @return object $form
+     */
     public function definition () {
         $mform = $this->_form;
 
@@ -74,6 +78,10 @@ class admin_uploadcourse_form1 extends moodleform {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_uploadcourse_form2 extends moodleform {
+    /**
+     * The standard form definiton
+     * @return object $form
+     */
     public function definition () {
         global $CFG, $COURSE, $DB;
 
@@ -289,6 +297,9 @@ class admin_uploadcourse_form2 extends moodleform {
 
     /**
      * Server side validation.
+     * @param array $data - form data
+     * @param object $files  - form files
+     * @return array $errors - form errors
      */
     public function validation($data, $files) {
         global $DB;

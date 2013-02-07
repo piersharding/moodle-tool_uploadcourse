@@ -17,8 +17,7 @@
 /**
  * Bulk course registration script from a comma separated file
  *
- * @package    tool
- * @subpackage uploadcourse
+ * @package    tool_uploadcourse
  * @copyright  2004 onwards Martin Dougiamas (http://dougiamas.com)
  * @copyright  2011 Piers Harding
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
