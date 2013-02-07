@@ -25,7 +25,7 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2012112300; // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2012112301; // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2011091600; // Requires this Moodle version
-$plugin->component = 'tool_uploadcourse'; // Full name of the plugin (used for diagnostics)
+$plugin->component = 'tool_uploadcourse'; // Full name of the plugin (used for diagnostics).
 

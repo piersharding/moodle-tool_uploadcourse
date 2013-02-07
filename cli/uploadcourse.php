@@ -101,7 +101,8 @@ Options:
 
 
 Example:
-\$sudo -u www-data /usr/bin/php admin/tool/uploadcourse/cli/uploadcourse.php --action=addupdate --mode=delete --file=./courses.csv --delimiter=comma
+\$sudo -u www-data /usr/bin/php admin/tool/uploadcourse/cli/uploadcourse.php --action=addupdate \\
+       --mode=delete --file=./courses.csv --delimiter=comma
 ";
 
 if ($options['help']) {
@@ -114,7 +115,9 @@ $actions = array('addnew' => CC_COURSE_ADDNEW,
                  'addupdate' => CC_COURSE_ADD_UPDATE,
                  'update' => CC_COURSE_UPDATE,
                  'forceadd' => CC_COURSE_ADDINC);
-if (!isset($options['action']) || !isset($actions[$options['action']]) || ($options['action'] != 'addnew' && !isset($options['mode']))) {
+if (!isset($options['action']) ||
+    !isset($actions[$options['action']]) ||
+    ($options['action'] != 'addnew' && !isset($options['mode']))) {
     echo get_string('invalidinput', 'tool_uploadcourse')."\n";
     echo $help;
     die;
@@ -138,12 +141,10 @@ $updatetype = array('nochange' => CC_UPDATE_NOCHANGES,
 if ($options['mode'] == 'rename') {
     $options['ccallowrenames'] = 1;
     unset($options['mode']);
-}
-else if ($options['mode'] == 'delete') {
+} else if ($options['mode'] == 'delete') {
     $options['ccallowdeletes'] = 1;
     unset($options['mode']);
-}
-else if (!isset($updatetype[$options['mode']])) {
+} else if (!isset($updatetype[$options['mode']])) {
     echo get_string('invalidmode', 'tool_uploadcourse')."\n";
     echo $help;
     die;
@@ -164,7 +165,7 @@ $options['groupmodeforce'] = $courseconfig->groupmodeforce;
 $options['visible'] = $courseconfig->visible;
 $options['lang'] =  $courseconfig->lang;
 
-if ($options['category']){
+if ($options['category']) {
     $split = preg_split('|(?<!\\\)/|', $options['category']);
     $categories = array();
     foreach ($split as $cat) {
@@ -173,7 +174,7 @@ if ($options['category']){
     }
     $options['category'] = 0;
     foreach ($categories as $cat) {
-        // does the category exist - does the category hierachy make sense
+        // Does the category exist - does the category hierachy make sense.
         $category = $DB->get_record('course_categories', array('name'=>trim($cat), 'parent' => $options['category']));
         if (empty($category)) {
             echo get_string('invalidcategory', 'tool_uploadcourse')."\n";
@@ -183,8 +184,7 @@ if ($options['category']){
         $options['category'] = $category->id;
     }
     $options['cccategory'] = $options['category'];
-}
-else {
+} else {
     $category = $DB->get_record('course_categories', array('id'=> 1));
     if (empty($category)) {
         echo get_string('invalidcategory', 'tool_uploadcourse')."\n";
@@ -194,7 +194,7 @@ else {
     $options['cccategory'] = $category->id;
 }
 
-if (isset($options['templateshortname'])){
+if (isset($options['templateshortname'])) {
     $options['ccshortname'] = $options['templateshortname'];
 }
 
@@ -236,16 +236,16 @@ $formdata = (object) $options;
 
 $returnurl = new moodle_url('/admin/tool/uploadcourse/index.php');
 $bulknurl  = new moodle_url('/admin/tool/uploadcourse/index.php');
-$STD_FIELDS = cc_std_fields();
+$std_fields = cc_std_fields();
 
-/// emulate normal session
+// Emulate normal session.
 cron_setup_user();
 
 $content = file_get_contents($formdata->file);
 $iid = csv_import_reader::get_new_iid('uploadcourse');
 $cir = new csv_import_reader($iid, 'uploadcourse');
 $readcount = $cir->load_csv_content($content, $formdata->encoding, $formdata->delimiter);
-$filecolumns = cc_validate_course_upload_columns($cir, $STD_FIELDS, $returnurl);
+$filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
 unset($content);
 if ($readcount === false) {
     print_error('csvfileerror', 'tool_uploadcourse', $returnurl, $cir->get_error());

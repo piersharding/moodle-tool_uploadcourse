@@ -41,7 +41,7 @@ admin_externalpage_setup('tooluploadcourse');
 
 $returnurl = new moodle_url('/admin/tool/uploadcourse/index.php');
 $bulknurl  = new moodle_url('/admin/tool/uploadcourse/index.php');
-$STD_FIELDS = cc_std_fields();
+$std_fields = cc_std_fields();
 
 
 if (empty($iid)) {
@@ -61,12 +61,11 @@ if (empty($iid)) {
         } else if ($readcount == 0) {
             print_error('csvemptyfile', 'error', $returnurl, $cir->get_error());
         }
-        // test if columns ok
-        $filecolumns = cc_validate_course_upload_columns($cir, $STD_FIELDS, $returnurl);
-        // continue to form2
+        // Test if columns ok.
+        $filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
+        // Continue to form2.
 
-    }
-    else {
+    } else {
         echo $OUTPUT->header();
 
         echo $OUTPUT->heading_with_help(get_string('uploadcourses', 'tool_uploadcourse'), 'uploadcourses', 'tool_uploadcourse');
@@ -75,22 +74,23 @@ if (empty($iid)) {
         echo $OUTPUT->footer();
         die;
     }
-}
-else {
+} else {
     $cir = new csv_import_reader($iid, 'uploadcourse');
-    $filecolumns = cc_validate_course_upload_columns($cir, $STD_FIELDS, $returnurl);
+    $filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
 }
 
 $frontpagecontext = context_course::instance(SITEID);
-$mform2 = new admin_uploadcourse_form2(null, array('contextid'=>$frontpagecontext->id, 'columns'=>$filecolumns, 'data'=>array('iid'=>$iid, 'previewrows'=>$previewrows)));
+$mform2 = new admin_uploadcourse_form2(null,
+                                       array('contextid' => $frontpagecontext->id,
+                                             'columns' => $filecolumns,
+                                             'data' => array('iid'=>$iid, 'previewrows'=>$previewrows)));
 
-// If a file has been uploaded, then process it
+// If a file has been uploaded, then process it.
 if ($formdata = $mform2->is_cancelled()) {
     $cir->cleanup(true);
     redirect($returnurl);
-}
-else if ($formdata = $mform2->get_data()) {
-    // Print the header
+} else if ($formdata = $mform2->get_data()) {
+    // Print the header.
     echo $OUTPUT->header();
     echo $OUTPUT->heading(get_string('uploadcoursesresult', 'tool_uploadcourse'));
 
@@ -111,15 +111,14 @@ else if ($formdata = $mform2->get_data()) {
 
     if ($bulk) {
         echo $OUTPUT->continue_button($bulknurl);
-    }
-    else {
+    } else {
         echo $OUTPUT->continue_button($returnurl);
     }
     echo $OUTPUT->footer();
     die;
 }
 
-// Print the header
+// Print the header.
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('uploadcoursespreview', 'tool_uploadcourse'));
@@ -128,15 +127,15 @@ echo $OUTPUT->heading(get_string('uploadcoursespreview', 'tool_uploadcourse'));
 //       this was intended for validation of csv formatting and encoding, not filtering the data!!!!
 //       we definitely must not process the whole file!
 
-// preview table data
+// Preview table data.
 $data = array();
 $cir->init();
-$linenum = 1; //column header is first line
+$linenum = 1; // Column header is first line.
 while ($linenum <= $previewrows and $fields = $cir->next()) {
     $linenum++;
     $rowcols = array();
     $rowcols['line'] = $linenum;
-    foreach($fields as $key => $field) {
+    foreach ($fields as $key => $field) {
         $rowcols[$filecolumns[$key]] = s($field);
     }
     $rowcols['status'] = array();
@@ -147,10 +146,11 @@ while ($linenum <= $previewrows and $fields = $cir->next()) {
             $rowcols['status'][] = get_string('invalidshortnameupload');
         }
         if ($courseid = $DB->get_field('course', 'id', array('shortname'=>$stdshortname))) {
-            $rowcols['shortname'] = html_writer::link(new moodle_url('/course/view.php', array('id'=>$courseid)), $rowcols['shortname']);
+            $rowcols['shortname'] = html_writer::link(new moodle_url('/course/view.php',
+                                                                     array('id' => $courseid)),
+                                                                     $rowcols['shortname']);
         }
-    }
-    else {
+    } else {
         $rowcols['status'][] = get_string('missingshortname');
     }
 
@@ -178,8 +178,7 @@ $table->head[] = get_string('status');
 
 echo html_writer::tag('div', html_writer::table($table), array('class'=>'flexible-wrap'));
 
-/// Print the form
-
+// Print the form.
 $mform2->display();
 echo $OUTPUT->footer();
 die;

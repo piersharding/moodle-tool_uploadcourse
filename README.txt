@@ -10,7 +10,8 @@ https://gitorious.org/moodle-tool_uploadcourse
 
 There is also a bulk course category upload function available at https://gitorious.org/moodle-tool_uploadcoursecategory
 
-If you need to manage course enrolments via bulk upload then you should look at the core user upload facility - http://docs.moodle.org/22/en/Upload_users
+If you need to manage course enrolments via bulk upload then you should look at 
+the core user upload facility - http://docs.moodle.org/22/en/Upload_users
 
 This takes CSV files as input and enables override or augmentation
 with default parameter values.
@@ -58,7 +59,8 @@ deleted,     // 1 means delete course
 oldshortname, // for renaming
 backupfile, // for restoring a course template after creation
 templatename, // course to use as a template - the shortname
-reset, // reset the course contents after upload
+reset, // reset the course contents after upload - this resets everything
+          - so you loose groups, roles, logs, grades etc. Be Careful!!!
 
 An example file is:
 
@@ -111,14 +113,15 @@ add the special columns for:
 
 startdate enrol_startdate enrol_enddate
 =======================================
-For startdate enrolstartdate, and enrolenddate the values should be supplied in the form of
-31.01.2012 or 31/01/2012.
+For startdate enrolstartdate, and enrolenddate the values should be supplied in the form like 31.01.2012 or
+31/01/2012 that can be consumed by strtotime() (http://php.net/manual/en/function.strtotime.php) - check
+your PHP locale settings for the fine tuning eg: m/d/y vs d/m/y.
 
 Enrolment method field 'enrolperiod' must be in seconds.  If this is supplied then enrolenddate will be calculated
 as enrolstartdate + enrolperiod.
 
-enrolperiod should be supplied in multiples of enrolment period measurements - 1 hour = 3600, 1 day = 86400 and so on. OR - you can pass a text string that
-php strtotime() can recognise eg: '2 weeks' or '10 days'
+enrolperiod should be supplied in multiples of enrolment period measurements - 1 hour = 3600, 1 day = 86400
+and so on. OR - you can pass a text string that php strtotime() can recognise eg: '2 weeks' or '10 days'
 
 Enrolment Method Role
 =====================
@@ -161,7 +164,8 @@ Options:
 
 
 Example:
-sudo -u www-data /usr/bin/php admin/tool/uploadcourse/cli/uploadcourse.php --action=addupdate --mode=delete --file=./courses.csv --delimiter=comma
+sudo -u www-data /usr/bin/php admin/tool/uploadcourse/cli/uploadcourse.php --action=addupdate \
+                 --mode=delete --file=./courses.csv --delimiter=comma
 
 
 
@@ -190,4 +194,3 @@ This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
-

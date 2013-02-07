@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once $CFG->libdir.'/formslib.php';
+require_once($CFG->libdir.'/formslib.php');
 
 
 /**
@@ -36,7 +36,7 @@ require_once $CFG->libdir.'/formslib.php';
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_uploadcourse_form1 extends moodleform {
-    function definition () {
+    public function definition () {
         $mform = $this->_form;
 
         $mform->addElement('header', 'settingsheader', get_string('upload'));
@@ -74,7 +74,7 @@ class admin_uploadcourse_form1 extends moodleform {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_uploadcourse_form2 extends moodleform {
-    function definition () {
+    public function definition () {
         global $CFG, $COURSE, $DB;
 
         $mform   = $this->_form;
@@ -82,10 +82,10 @@ class admin_uploadcourse_form2 extends moodleform {
         $data    = $this->_customdata['data'];
         $courseconfig = get_config('moodlecourse');
 
-        // I am the template course, why should it be the administrator? we have roles now, other ppl may use this script ;-)
+        // I am the template course, why should it be the administrator? we have roles now, other ppl may use this script ;-).
         $templatecourse = $COURSE;
 
-        // upload settings and file
+        // Upload settings and file.
         $mform->addElement('header', 'settingsheader', get_string('settings'));
 
         $choices = array(CC_COURSE_ADDNEW     => get_string('ccoptype_addnew', 'tool_uploadcourse'),
@@ -121,15 +121,7 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addElement('selectyesno', 'ccstandardshortnames', get_string('ccstandardshortnames', 'tool_uploadcourse'));
         $mform->setDefault('ccstandardshortnames', 1);
 
-//        $choices = array(CC_BULK_NONE    => get_string('no'),
-//                         CC_BULK_NEW     => get_string('ccbulknew', 'tool_uploadcourse'),
-//                         CC_BULK_UPDATED => get_string('ccbulkupdated', 'tool_uploadcourse'),
-//                         CC_BULK_ALL     => get_string('ccbulkall', 'tool_uploadcourse'));
-//        $mform->addElement('select', 'ccbulk', get_string('ccbulk', 'tool_uploadcourse'), $choices);
-//        $mform->setDefault('ccbulk', 0);
-
-
-        // default values
+        // Default values.
         $mform->addElement('header', 'defaultheader', get_string('defaultvalues', 'tool_uploadcourse'));
         $displaylist = array();
         $parentlist = array();
@@ -137,21 +129,11 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addElement('select', 'cccategory', get_string('category'), $displaylist);
         $mform->addHelpButton('cccategory', 'category');
 
-        $mform->addElement('text', 'ccshortname', get_string('ccshortnametemplate', 'tool_uploadcourse'), 'maxlength="100" size="20"');
+        $mform->addElement('text', 'ccshortname', get_string('ccshortnametemplate', 'tool_uploadcourse'),
+                           'maxlength="100" size="20"');
         $mform->addHelpButton('ccshortname', 'shortnamecourse', 'tool_uploadcourse');
-//        $mform->addRule('ccshortname', get_string('requiredtemplate', 'tool_uploadcourse'), 'required', null, 'client');
         $mform->disabledIf('ccshortname', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
         $mform->disabledIf('ccshortname', 'cctype', 'eq', CC_COURSE_UPDATE);
-
-//        $mform->addElement('text', 'ccfullname', get_string('ccfullnametemplate', 'tool_uploadcourse'), 'maxlength="254" size="50"');
-//        $mform->addHelpButton('ccfullname', 'fullnamecourse');
-//        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
-//        $mform->disabledIf('ccfullname', 'cctype', 'eq', CC_COURSE_UPDATE);
-//
-//        $mform->addElement('text','ccidnumber', get_string('ccidnumbertemplate', 'tool_uploadcourse'),'maxlength="100"  size="10"');
-//        $mform->addHelpButton('ccidnumber', 'idnumbercourse');
-//        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_ADD_UPDATE);
-//        $mform->disabledIf('ccidnumber', 'cctype', 'eq', CC_COURSE_UPDATE);
 
         $courseformats = get_plugin_list('format');
         $formcourseformats = array();
@@ -199,7 +181,7 @@ class admin_uploadcourse_form2 extends moodleform {
 
         if (!empty($course->legacyfiles) or !empty($CFG->legacyfilesinnewcourses)) {
             if (empty($course->legacyfiles)) {
-                //0 or missing means no legacy files ever used in this course - new course or nobody turned on legacy files yet
+                // 0 or missing means no legacy files ever used in this course - new course or nobody turned on legacy files yet.
                 $choices = array('0'=>get_string('no'), '2'=>get_string('yes'));
             } else {
                 $choices = array('1'=>get_string('no'), '2'=>get_string('yes'));
@@ -207,7 +189,7 @@ class admin_uploadcourse_form2 extends moodleform {
             $mform->addElement('select', 'legacyfiles', get_string('courselegacyfiles'), $choices);
             $mform->addHelpButton('legacyfiles', 'courselegacyfiles');
             if (!isset($courseconfig->legacyfiles)) {
-                // in case this was not initialised properly due to switching of $CFG->legacyfilesinnewcourses
+                // In case this was not initialised properly due to switching of $CFG->legacyfilesinnewcourses.
                 $courseconfig->legacyfiles = 0;
             }
             $mform->setDefault('legacyfiles', $courseconfig->legacyfiles);
@@ -217,7 +199,7 @@ class admin_uploadcourse_form2 extends moodleform {
             $themeobjects = get_list_of_themes();
             $themes=array();
             $themes[''] = get_string('forceno');
-            foreach ($themeobjects as $key=>$theme) {
+            foreach ($themeobjects as $key => $theme) {
                 if (empty($theme->hidefromselector)) {
                     $themes[$key] = get_string('pluginname', 'theme_'.$theme->name);
                 }
@@ -237,11 +219,9 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addElement('hidden', 'contextid', $contextid);
         $mform->addElement('filepicker', 'restorefile', get_string('templatefile', 'tool_uploadcourse'));
 
-//--------------------------------------------------------------------------------
         enrol_course_edit_form($mform, null, get_context_instance(CONTEXT_SYSTEM));
 
-//--------------------------------------------------------------------------------
-        $mform->addElement('header','', get_string('groups', 'group'));
+        $mform->addElement('header', '', get_string('groups', 'group'));
 
         $choices = array();
         $choices[NOGROUPS] = get_string('groupsnone', 'group');
@@ -258,13 +238,12 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addHelpButton('groupmodeforce', 'groupmodeforce', 'group');
         $mform->setDefault('groupmodeforce', $courseconfig->groupmodeforce);
 
-        //default groupings selector
+        // Default groupings selector.
         $options = array();
         $options[0] = get_string('none');
         $mform->addElement('select', 'defaultgroupingid', get_string('defaultgrouping', 'group'), $options);
 
-//--------------------------------------------------------------------------------
-        $mform->addElement('header','', get_string('availability'));
+        $mform->addElement('header', '', get_string('availability'));
 
         $choices = array();
         $choices['0'] = get_string('courseavailablenot');
@@ -272,17 +251,8 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addElement('select', 'visible', get_string('availability'), $choices);
         $mform->addHelpButton('visible', 'availability');
         $mform->setDefault('visible', $courseconfig->visible);
-//        if (!has_capability('moodle/course:visibility', $context)) {
-//            $mform->hardFreeze('visible');
-//            if (!empty($course->id)) {
-//                $mform->setConstant('visible', $course->visible);
-//            } else {
-//                $mform->setConstant('visible', $category->visible);
-//            }
-//        }
 
-//--------------------------------------------------------------------------------
-        $mform->addElement('header','', get_string('language'));
+        $mform->addElement('header', '', get_string('language'));
 
         $languages=array();
         $languages[''] = get_string('forceno');
@@ -290,7 +260,7 @@ class admin_uploadcourse_form2 extends moodleform {
         $mform->addElement('select', 'lang', get_string('forcelanguage'), $languages);
         $mform->setDefault('lang', $courseconfig->lang);
 
-        // hidden fields
+        // Hidden fields.
         $mform->addElement('hidden', 'iid');
         $mform->setType('iid', PARAM_INT);
 
@@ -305,7 +275,7 @@ class admin_uploadcourse_form2 extends moodleform {
     /**
      * Form tweaks that depend on current data.
      */
-    function definition_after_data() {
+    public function definition_after_data() {
         $mform   = $this->_form;
         $columns = $this->_customdata['columns'];
 
@@ -320,19 +290,15 @@ class admin_uploadcourse_form2 extends moodleform {
     /**
      * Server side validation.
      */
-    function validation($data, $files) {
+    public function validation($data, $files) {
         global $DB;
 
         $errors = parent::validation($data, $files);
         $columns = $this->_customdata['columns'];
         $optype  = $data['cctype'];
 
-
-        // look for other required data
+        // Look for other required data.
         if ($optype != CC_COURSE_UPDATE) {
-//            if (!in_array('shortname', $columns)) {
-//                $errors['cctype'] = get_string('missingfield', 'error', 'shortname');
-//            }
             if (!in_array('fullname', $columns)) {
                 if (isset($errors['cctype'])) {
                     $errors['cctype'] .= ' ';
@@ -360,7 +326,7 @@ class admin_uploadcourse_form2 extends moodleform {
      *
      * @return stdClass
      */
-    function get_data() {
+    public function get_data() {
         $data = parent::get_data();
 
         if ($data !== null and isset($data->description)) {

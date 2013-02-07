@@ -46,20 +46,22 @@ define('CC_BULK_NONE', 0);
 
 
 function cc_std_fields() {
-    // array of all valid fields for validation
-    return $STD_FIELDS = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
+    // Array of all valid fields for validation.
+    return $std_fields = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
                     'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student', 'modinfo',
-                    'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections', 'maxbytes', 'visible', 'groupmode', 'restrictmodules',
-                    'enablecompletion', 'completionstartonenrol', 'completionnotify', 'hiddensections', 'groupmodeforce', 'lang', 'theme',
+                    'manager', 'coursecreator', 'guest', 'user', 'startdate', 'numsections',
+                    'maxbytes', 'visible', 'groupmode', 'restrictmodules',
+                    'enablecompletion', 'completionstartonenrol', 'completionnotify',
+                    'hiddensections', 'groupmodeforce', 'lang', 'theme',
                     'cost', 'showreports', 'notifystudents', 'expirynotify', 'expirythreshold', 'requested',
-                    'deleted',     // 1 means delete course
-                    'oldshortname', // for renaming
-                    'backupfile', // for restoring a course template after creation
-                    'templatename', // course to use as a template - the shortname
+                    'deleted',     // 1 means delete course.
+                    'oldshortname', // For renaming.
+                    'backupfile', // For restoring a course template after creation.
+                    'templatename', // Course to use as a template - the shortname.
                     'reset',
-                    // there are also the enrolment fields but these are free form as they vary on enrolment type
+                    // There are also the enrolment fields but these are free form as they vary on enrolment type
                     // eg: enrolmethod_1,status_1,enrolmethod_2,name_2,password_2,customtext1_2
-                    //     manual,       1,       self,         self1, letmein,   this is a custom message 1
+                    //     manual,       1,       self,         self1, letmein,   this is a custom message 1.
     );
 }
 
@@ -71,9 +73,9 @@ function cc_std_fields() {
 function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=null, $plain=false) {
     global $CFG, $USER, $OUTPUT, $SESSION, $DB;
 
-    $STD_FIELDS = cc_std_fields();
+    $std_fields = cc_std_fields();
 
-    @set_time_limit(60*60); // 1 hour should be enough
+    @set_time_limit(60*60); // 1 hour should be enough.
     raise_memory_limit(MEMORY_HUGE);
 
     require_capability('moodle/course:create', get_context_instance(CONTEXT_SYSTEM));
@@ -115,12 +117,12 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
     $bulk              = isset($formdata->ccbulk) ? $formdata->ccbulk : 0;
     $standardshortnames = $formdata->ccstandardshortnames;
 
-    // check for the template
+    // Check for the template.
     $templatepathname = null;
     if (!empty($formdata->templatename) && $formdata->templatename != 'none') {
         $template = $DB->get_record('course', array('shortname' => $formdata->templatename));
 
-        // backup the course template
+        // Backup the course template.
         $bc = new backup_controller(backup::TYPE_1COURSE, $template->id, backup::FORMAT_MOODLE,
                         backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
         $backupid       = $bc->get_backupid();
@@ -128,18 +130,18 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
         $bc->execute_plan();
         $bc->destroy();
         $packer = get_file_packer('application/zip');
-        // check if tmp dir exists
+        // Check if tmp dir exists.
         $tmpdir = $CFG->tempdir . '/backup';
         if (!check_dir_exists($tmpdir, true, true)) {
             throw new restore_controller_exception('cannot_create_backup_temp_dir');
         }
         $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
         $templatepathname = $tmpdir . '/' . $filename;
-        // Get the list of files in directory
+        // Get the list of files in directory.
         $filestemp = get_directory_list($backupbasepath, '', false, true, true);
         $files = array();
         foreach ($filestemp as $file) {
-            // Add zip paths and fs paths to all them
+            // Add zip paths and fs paths to all them.
             $files[$file] = $backupbasepath . '/' . $file;
         }
         $zippacker = get_file_packer('application/zip');
@@ -149,22 +151,15 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
         }
     }
 
-    // check the uploaded backup file
-//     $restorefile = null;
+    // Check the uploaded backup file.
     if (!empty($formdata->restorefile)) {
-        // check if tmp dir exists
-//         $tmpdir = $CFG->tempdir . '/backup';
-//         if (!check_dir_exists($tmpdir, true, true)) {
-//             throw new restore_controller_exception('cannot_create_backup_temp_dir');
-//         }
-//         $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
-//         $restorefile = $tmpdir . '/' . $filename;
+        // Check if tmp dir exists.
         if ($restorefile) {
             $filepath = restore_controller::get_tempdir_name(SITEID, $USER->id);
             $packer = get_file_packer('application/zip');
             $restorepathname = "$CFG->tempdir/backup/$filepath/";
             $result = $packer->extract_to_pathname($restorefile, $restorepathname);
-            // if not a backup zip file
+            // If not a backup zip file.
             if (!$result) {
                 if (empty($CFG->keeptempdirectoriesonbackup)) {
                     fulldelete($restorepathname);
@@ -175,16 +170,15 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             if (empty($CFG->keeptempdirectoriesonbackup)) {
                 fulldelete($restorepathname);
             }
-        }
-        else {
+        } else {
             $restorefile = null;
         }
     }
 
-    // verification moved to two places: after upload and into form2
+    // Verification moved to two places: after upload and into form2.
     $coursesnew      = 0;
     $coursesupdated  = 0;
-    $coursesuptodate = 0; //not printed yet anywhere
+    $coursesuptodate = 0; // Not printed yet anywhere.
     $courseserrors   = 0;
     $deletes       = 0;
     $deleteerrors  = 0;
@@ -193,18 +187,18 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
     $coursesskipped  = 0;
     $enrolmentplugins = enrol_get_plugins(false);
 
-    // clear bulk selection
+    // Clear bulk selection.
     if ($bulk) {
         $SESSION->bulk_courses = array();
     }
 
-    // init csv import helper
+    // Init csv import helper.
     $cir->init();
-    $linenum = 1; //column header is first line
+    $linenum = 1; // Column header is first line.
 
-    // init upload progress tracker
+    // Init upload progress tracker.
     $upt = new cc_progress_tracker($plain);
-    $upt->start(); // start table
+    $upt->start(); // Start table.
 
     while ($line = $cir->next()) {
         $upt->flush();
@@ -214,21 +208,21 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
 
         $course = new stdClass();
 
-        // add fields to course object
+        // Add fields to course object.
         foreach ($line as $keynum => $value) {
             if (!isset($filecolumns[$keynum])) {
-                // this should not happen
+                // This should not happen.
                 continue;
             }
             $key = $filecolumns[$keynum];
             $course->$key = $value;
 
             if (in_array($key, $upt->columns)) {
-                // default value in progress tracking table, can be changed later
+                // Default value in progress tracking table, can be changed later.
                 $upt->track($key, s($value), 'normal');
             }
         }
-        // validate category
+        // Validate category.
         $error = false;
         if (!empty($course->category)) {
             $split = preg_split('|(?<!\\\)/|', $course->category);
@@ -239,7 +233,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
             $course->category = 0;
             foreach ($categories as $cat) {
-                // does the category exist - does the category hierachy make sense
+                // Does the category exist - does the category hierachy make sense.
                 $category = $DB->get_record('course_categories', array('name'=>trim($cat), 'parent' => $course->category));
                 if (empty($category)) {
                     $upt->track('status', get_string('invalidvalue', 'tool_uploadcourse', 'category'), 'error');
@@ -250,14 +244,14 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 $course->category = $category->id;
             }
         }
-        // check for category errors
+        // Check for category errors.
         if ($error) {
             $courseserrors++;
             continue;
         }
 
         if (!isset($course->shortname)) {
-            // prevent warnings bellow
+            // Prevent warnings bellow.
             $course->shortname = '';
         }
         if (!empty($course->startdate) && $course->startdate != 0) {
@@ -267,7 +261,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $course->enrolstartdate = strtotime($course->enrolstartdate);
         }
 
-        // check for enrolment methods
+        // Check for enrolment methods.
         $line_fields = (array) $course;
         $enrolmethods = array();
         $enrolments = array();
@@ -295,20 +289,21 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $enrolmethods[$k] = $enrolments[$v];
         }
 
-        // roles
+        // Roles.
         $roles = get_all_roles();
         foreach ($roles as $role) {
             if (isset($course->{$role->shortname})) {
-                if (in_array($role->shortname, array('teacher', 'editingteacher', 'student', 'manager', 'coursecreator', 'guest', 'user'))) {
+                if (in_array($role->shortname, array('teacher', 'editingteacher', 'student',
+                                                     'manager', 'coursecreator', 'guest', 'user'))) {
                     $course->{'role_'.$role->id} = $course->{$role->shortname};
                 }
             }
         }
 
-        // what type of operation is this ?
+        // What type of operation is this ?
         if ($optype == CC_COURSE_ADDNEW or $optype == CC_COURSE_ADDINC) {
-            // course creation is a special case - the shortname may be constructed from templates using firstname and lastname
-            // better never try this in mixed update types
+            // Course creation is a special case - the shortname may be constructed from templates using firstname and lastname
+            // better never try this in mixed update types.
             $error = false;
             if (!isset($course->fullname) or $course->fullname === '') {
                 $upt->track('status', get_string('missingfield', 'error', 'fullname'), 'error');
@@ -324,20 +319,20 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 $courseserrors++;
                 continue;
             }
-            // we require shortname too - we might use template for it though
+            // We require shortname too - we might use template for it though.
             if (empty($course->shortname) and !empty($formdata->ccshortname)) {
                 $course->shortname = cc_process_template($formdata->ccshortname, $course);
                 $upt->track('shortname', s($course->shortname));
             }
         }
 
-        // normalize shortname
+        // Normalize shortname.
         $originalshortname = $course->shortname;
         if ($standardshortnames) {
             $course->shortname = clean_param($course->shortname, PARAM_MULTILANG);
         }
 
-        // make sure we really have shortname
+        // Make sure we really have shortname.
         if (empty($course->shortname)) {
             $upt->track('status', get_string('missingfield', 'error', 'shortname'), 'error');
             $upt->track('shortname', $errorstr, 'error');
@@ -349,7 +344,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $upt->track('id', $existingcourse->id, 'normal', false);
         }
 
-        // find out in shortname incrementing required
+        // Find out in shortname incrementing required.
         if ($existingcourse and $optype == CC_COURSE_ADDINC) {
             $course->shortname = cc_increment_shortname($course->shortname);
             if (!empty($course->idnumber)) {
@@ -362,7 +357,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $existingcourse = false;
         }
 
-        // check duplicate idnumber
+        // Check duplicate idnumber.
         if (!$existingcourse and !empty($course->idnumber)) {
             if ($DB->record_exists('course', array('idnumber' => $course->idnumber))) {
                 $upt->track('status', get_string('idnumbernotunique', 'tool_uploadcourse'), 'error');
@@ -371,47 +366,49 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // notify about nay shortname changes
+        // Notify about nay shortname changes.
         if ($originalshortname !== $course->shortname) {
-            $upt->track('shortname', '', 'normal', false); // clear previous
+            $upt->track('shortname', '', 'normal', false); // Clear previous.
             $upt->track('shortname', s($originalshortname).'-->'.s($course->shortname), 'info');
         } else {
             $upt->track('shortname', s($course->shortname), 'normal', false);
         }
 
-        // add default values for remaining fields
+        // Add default values for remaining fields.
         $formdefaults = array();
-        foreach ($STD_FIELDS as $field) {
+        foreach ($std_fields as $field) {
             if (isset($course->$field)) {
                 continue;
             }
-            // all validation moved to form2
+            // All validation moved to form2.
             if (isset($formdata->$field)) {
                 $course->$field = $formdata->$field;
                 $formdefaults[$field] = true;
                 if (in_array($field, $upt->columns)) {
                     $upt->track($field, s($course->$field), 'normal');
                 }
-            }
-            else {
-                // process templates
+            } else {
+                // Process templates.
                 if (isset($formdata->{"cc".$field}) && !empty($formdata->{"cc".$field}) && empty($course->$field)) {
                     $course->$field = cc_process_template($formdata->{"cc".$field}, $course);
                 }
             }
         }
-        // do we run the reset ?
+        // Do we run the reset ?
         $resetcourse = false;
         if ($course->reset) {
             $resetcourse = true;
             unset($course->reset);
         }
 
+        // Proof visible flag.
+        $course->visible = (int) $course->visible;
+
         if (empty($course->category)) {
             $course->category = $formdata->cccategory;
         }
 
-        // delete course
+        // Delete course.
         if (!empty($course->deleted)) {
             if (!$allowdeletes) {
                 $coursesskipped++;
@@ -432,10 +429,10 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
             continue;
         }
-        // we do not need the deleted flag anymore
+        // We do not need the deleted flag anymore.
         unset($course->deleted);
 
-        // renaming requested?
+        // Renaming requested?
         if (!empty($course->oldshortname) ) {
             if (!$allowrenames) {
                 $coursesskipped++;
@@ -455,11 +452,11 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 $oldshortname = $course->oldshortname;
             }
 
-            // no guessing when looking for old shortname, it must be exact match
+            // No guessing when looking for old shortname, it must be exact match.
             if ($oldcourse = $DB->get_record('course', array('shortname'=>$oldshortname))) {
                 $upt->track('id', $oldcourse->id, 'normal', false);
                 $DB->set_field('course', 'shortname', $course->shortname, array('id'=>$oldcourse->id));
-                $upt->track('shortname', '', 'normal', false); // clear previous
+                $upt->track('shortname', '', 'normal', false); // Clear previous.
                 $upt->track('shortname', s($oldshortname).'-->'.s($course->shortname), 'info');
                 $upt->track('status', $strcourserenamed);
                 $renames++;
@@ -472,7 +469,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $existingcourse->shortname = $course->shortname;
         }
 
-        // can we process with update or insert?
+        // Can we process with update or insert?
         $skip = false;
         switch ($optype) {
             case CC_COURSE_ADDNEW:
@@ -485,7 +482,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
 
             case CC_COURSE_ADDINC:
                 if ($existingcourse) {
-                    //this should not happen!
+                    // This should not happen!
                     $upt->track('status', $strcoursenotaddederror, 'error');
                     $courseserrors++;
                     $skip = true;
@@ -504,19 +501,18 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 break;
 
             default:
-                // unknown type
+                // Unknown type.
                 $skip = true;
         }
 
-        // check for the backup file as template
+        // Check for the backup file as template.
         $backupfile = null;
         if (!empty($course->backupfile)) {
-            if (!is_readable($course->backupfile) || !preg_match('/(\.mbz|\.zip)$/i', $course->backupfile)){
+            if (!is_readable($course->backupfile) || !preg_match('/(\.mbz|\.zip)$/i', $course->backupfile)) {
                 $upt->track('status', get_string('incorrecttemplatefile', 'tool_uploadcourse'), 'error');
                 $courseserrors++;
                 $skip = true;
-            }
-            else {
+            } else {
                 $backupfile = $course->backupfile;
             }
         }
@@ -525,37 +521,38 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             continue;
         }
 
-
         $templatename = null;
         if ($existingcourse) {
             $course->id = $existingcourse->id;
 
-            $upt->track('shortname', html_writer::link(new moodle_url('/course/view.php', array('id'=>$existingcourse->id)), s($existingcourse->shortname)), 'normal', false);
+            $upt->track('shortname', html_writer::link(new moodle_url('/course/view.php',
+                                                                      array('id '=> $existingcourse->id)),
+                                                                      s($existingcourse->shortname)),
+                                                                      'normal', false);
 
             $existingcourse->timemodified = time();
-            // do NOT mess with timecreated or firstaccess here!
+            // Do NOT mess with timecreated or firstaccess here!
             $doupdate = false;
 
             if ($updatetype != CC_UPDATE_NOCHANGES) {
-                foreach ($STD_FIELDS as $column) {
+                foreach ($std_fields as $column) {
                     if ($column === 'shortname') {
-                        // these can not be changed here
+                        // These can not be changed here.
                         continue;
                     }
                     if (!property_exists($course, $column) or !property_exists($existingcourse, $column)) {
-                        // this should never happen
+                        // This should never happen.
                         continue;
                     }
+                    // In the case $updatetype == CC_UPDATE_ALLOVERRIDE we override everything.
                     if ($updatetype == CC_UPDATE_MISSING) {
                         if (!is_null($existingcourse->$column) and $existingcourse->$column !== '') {
                             continue;
                         }
-                    } else if ($updatetype == CC_UPDATE_ALLOVERRIDE) {
-                        // we override everything
 
                     } else if ($updatetype == CC_UPDATE_FILEOVERRIDE) {
                         if (!empty($formdefaults[$column])) {
-                            // do not override with form defaults
+                            // Do not override with form defaults.
                             continue;
                         }
                     }
@@ -570,7 +567,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
 
             if ($doupdate) {
-                // we want only courses that were really updated
+                // We want only courses that were really updated.
                 update_course($existingcourse);
                 $upt->track('status', $strcourseupdated);
                 $coursesupdated++;
@@ -584,7 +581,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 }
 
             } else {
-                // no course information changed
+                // No course information changed.
                 $upt->track('status', $strcourseuptodate);
                 $coursesuptodate++;
 
@@ -596,34 +593,34 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
 
         } else {
-            // save the new course to the database
+            // Save the new course to the database.
             $course->timemodified = time();
             $course->timecreated  = time();
 
-
-            // create course - insert_record ignores any extra properties
+            // Create course - insert_record ignores any extra properties.
             if (isset($course->templatename) && $course->templatename != 'none') {
                 $templatename = $course->templatename;
-            }
-            else {
+            } else {
                 $templatename = null;
             }
             try {
                 $course = create_course($course);
-            }
-            catch (moodle_exception $e) {
+            } catch (moodle_exception $e) {
                 $upt->track('status', $e->getMessage(), 'error');
                 $courseserrors++;
                 $skip = true;
                 continue;
             }
-            $upt->track('shortname', html_writer::link(new moodle_url('/course/view.php', array('id'=>$course->id)), s($course->shortname)), 'normal', false);
+            $upt->track('shortname', html_writer::link(new moodle_url('/course/view.php',
+                                                                      array('id' => $course->id)),
+                                                                      s($course->shortname)),
+                                                                      'normal', false);
 
             $upt->track('status', $strcourseadded);
             $upt->track('id', $course->id, 'normal', false);
             $coursesnew++;
 
-            // make sure course context exists
+            // Make sure course context exists.
             get_context_instance(CONTEXT_COURSE, $course->id);
 
             events_trigger('course_created', $course);
@@ -635,7 +632,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // after creation/update, do we need to copy from template nominated in the CSV file?
+        // After creation/update, do we need to copy from template nominated in the CSV file?
         if (!empty($templatename)) {
             $coursetemplate = $DB->get_record('course', array('shortname' => $templatename));
             if (empty($coursetemplate)) {
@@ -644,7 +641,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 continue;
             }
 
-            // backup the course template
+            // Backup the course template.
             $bc = new backup_controller(backup::TYPE_1COURSE, $coursetemplate->id, backup::FORMAT_MOODLE,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
             $backupid       = $bc->get_backupid();
@@ -652,18 +649,18 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $bc->execute_plan();
             $bc->destroy();
             $packer = get_file_packer('application/zip');
-            // check if tmp dir exists
+            // Check if tmp dir exists.
             $tmpdir = $CFG->tempdir . '/backup';
             if (!check_dir_exists($tmpdir, true, true)) {
                 throw new restore_controller_exception('cannot_create_backup_temp_dir');
             }
             $filename = restore_controller::get_tempdir_name(SITEID, $USER->id);
             $temppathname = $tmpdir . '/' . $filename;
-            // Get the list of files in directory
+            // Get the list of files in directory.
             $filestemp = get_directory_list($backupbasepath, '', false, true, true);
             $files = array();
             foreach ($filestemp as $file) {
-                // Add zip paths and fs paths to all them
+                // Add zip paths and fs paths to all them.
                 $files[$file] = $backupbasepath . '/' . $file;
             }
             $zippacker = get_file_packer('application/zip');
@@ -672,17 +669,17 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 fulldelete($backupbasepath);
             }
 
-            // check if tmp dir exists
+            // Check if tmp dir exists.
             $tmpdir = $CFG->tempdir . '/backup';
             $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
             $pathname = $tmpdir . '/' . $filename;
             $packer = get_file_packer('application/zip');
             $packer->extract_to_pathname($temppathname, $pathname);
 
-            // restore the backup immediately
+            // Restore the backup immediately.
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
-            // check if the format conversion must happen first
+            // Check if the format conversion must happen first.
             if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
                 $rc->convert();
             }
@@ -707,19 +704,19 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // after creation/update, do we need to copy from template?
+        // After creation/update, do we need to copy from template?
         if (!empty($templatepathname)) {
-            // check if tmp dir exists
+            // Check if tmp dir exists.
             $tmpdir = $CFG->tempdir . '/backup';
             $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
             $pathname = $tmpdir . '/' . $filename;
             $packer = get_file_packer('application/zip');
             $packer->extract_to_pathname($templatepathname, $pathname);
 
-            // restore the backup immediately
+            // Restore the backup immediately.
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
-            // check if the format conversion must happen first
+            // Check if the format conversion must happen first.
             if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
                 $rc->convert();
             }
@@ -744,19 +741,19 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // after creation/update, do we need to copy from template backup file?
+        // After creation/update, do we need to copy from template backup file?
         if (!empty($restorefile)) {
-            // check if tmp dir exists
+            // Check if tmp dir exists.
             $tmpdir = $CFG->tempdir . '/backup';
             $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
             $pathname = $tmpdir . '/' . $filename;
             $packer = get_file_packer('application/zip');
             $packer->extract_to_pathname($restorefile, $pathname);
 
-            // restore the backup immediately
+            // Restore the backup immediately.
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
-            // check if the format conversion must happen first
+            // Check if the format conversion must happen first.
             if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
                 $rc->convert();
             }
@@ -781,9 +778,9 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // after creation/update, do we need to import a Moodle backup?
+        // After creation/update, do we need to import a Moodle backup?
         if (!empty($backupfile)) {
-            // check if tmp dir exists
+            // Check if tmp dir exists.
             $tmpdir = $CFG->tempdir . '/backup';
             if (!check_dir_exists($tmpdir, true, true)) {
                 throw new restore_controller_exception('cannot_create_backup_temp_dir');
@@ -793,10 +790,10 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $packer = get_file_packer('application/zip');
             $packer->extract_to_pathname($backupfile, $pathname);
 
-            // restore the backup immediately
+            // Restore the backup immediately.
             $rc = new restore_controller($filename, $course->id,
                             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_CURRENT_ADDING);
-            // check if the format conversion must happen first
+            // Check if the format conversion must happen first.
             if ($rc->get_status() == backup::STATUS_REQUIRE_CONV) {
                 $rc->convert();
             }
@@ -821,12 +818,12 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // handle enrolment methods
+        // Handle enrolment methods.
         $enrol_updated = false;
         $instances = enrol_get_instances($course->id, false);
         foreach ($enrolments as $method) {
             if (isset($method['delete']) && $method['delete']) {
-                // remove the enrolment method
+                // Remove the enrolment method.
                 foreach ($instances as $instance) {
                     if ($instance->enrol == $method['enrolmethod']) {
                         $plugin = $enrolmentplugins[$instance->enrol];
@@ -835,9 +832,8 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                         break;
                     }
                 }
-            }
-            else if (isset($method['disable']) && $method['disable']) {
-                // disable the enrolment
+            } else if (isset($method['disable']) && $method['disable']) {
+                // Disable the enrolment.
                 foreach ($instances as $instance) {
                     if ($instance->enrol == $method['enrolmethod']) {
                         $plugin = $enrolmentplugins[$instance->enrol];
@@ -846,9 +842,8 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                         break;
                     }
                 }
-            }
-            else {
-                // we should have this enrolment method
+            } else {
+                // We should have this enrolment method.
                 $instance = null;
                 foreach ($instances as $i) {
                     if ($i->enrol == $method['enrolmethod']) {
@@ -861,27 +856,25 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                     $plugin = $enrolmentplugins[$method['enrolmethod']];
                     $instance = $plugin->add_default_instance($course);
                     $instance->roleid = $plugin->get_config('roleid');
-                }
-                else {
+                } else {
                     $plugin = $enrolmentplugins[$instance->enrol];
                     $plugin->update_status($instance, ENROL_INSTANCE_ENABLED);
                 }
-                // now update values
+                // Now update values.
                 foreach ($method as $k => $v) {
                     $instance->{$k} = $v;
                 }
 
-                // sort out the start, end and date
+                // Sort out the start, end and date.
                 $instance->enrolstartdate = (isset($method['startdate']) ? strtotime($method['startdate']) : 0);
                 $instance->enrolenddate = (isset($method['enddate']) ? strtotime($method['enddate']) : 0);
 
-                // is the enrolment period set?
+                // Is the enrolment period set?
                 if (isset($method['enrolperiod']) && ! empty($method['enrolperiod'])) {
                     if (preg_match('/^\d+$/', $method['enrolperiod'])) {
                         $method['enrolperiod'] = (int) $method['enrolperiod'];
-                    }
-                    else {
-                        // try and convert period to seconds
+                    } else {
+                        // Try and convert period to seconds.
                         $method['enrolperiod'] = strtotime('1970-01-01 GMT + ' . $method['enrolperiod']);
                     }
                     $instance->enrolperiod = $method['enrolperiod'];
@@ -895,7 +888,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
                 if ($instance->enrolenddate < $instance->enrolstartdate) {
                     $instance->enrolenddate = $instance->enrolstartdate;
                 }
-                // sort out the given Role
+                // Sort out the given Role.
                 if (isset($method['role'])) {
                     $context = context_course::instance($course->id);
                     $roles = get_default_enrol_roles($context, $plugin->get_config('roleid'));
@@ -913,7 +906,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
         }
 
-        // do the course reset
+        // Do the course reset.
         if ($resetcourse) {
             $resetdata = new stdClass();
             $resetdata->reset_start_date = time();
@@ -927,8 +920,6 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             $roles = get_assignable_roles(context_course::instance($course->id));
             $roles[0] = get_string('noroles', 'role');
             $roles = array_reverse($roles, true);
-//             $resetdata->unenrol_users = $roles;
-//             $resetdata->reset_roles_overrides = true;
             $resetdata->reset_roles_local = true;
             $resetdata->reset_gradebook_items = true;
             $resetdata->reset_gradebook_grades = true;
@@ -946,12 +937,12 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
         if ($enrol_updated) {
             $coursesupdated++;
         }
-        // invalidate all enrol caches
+        // Invalidate all enrol caches.
         $context = context_course::instance($course->id);
         $context->mark_dirty();
     }
 
-    // clean up backup files
+    // Clean up backup files.
     if (!empty($template)) {
         if (empty($CFG->keeptempdirectoriesonbackup)) {
             fulldelete($backupbasepath);
@@ -963,7 +954,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
         }
     }
 
-    $upt->close(); // close table
+    $upt->close(); // Close table.
 
     $cir->close();
     $cir->cleanup(true);
@@ -991,8 +982,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             echo get_string('coursesskipped', 'tool_uploadcourse').': '.$coursesskipped.'<br />';
         }
         echo get_string('errors', 'tool_uploadcourse').': '.$courseserrors.'</p>';
-    }
-    else {
+    } else {
         if ($optype != CC_COURSE_UPDATE) {
             echo get_string('coursescreated', 'tool_uploadcourse').': '.$coursesnew."\n";
         }
@@ -1036,7 +1026,7 @@ class cc_progress_tracker {
      *
      * @param boolean $type - is this plain text output
      */
-    function cc_progress_tracker($type = false) {
+    public function __construct($type = false) {
         $this->_plain = $type;
     }
 
@@ -1051,9 +1041,9 @@ class cc_progress_tracker {
             echo "\n\t".get_string('status')."\t".get_string('cccsvline', 'tool_uploadcourse')."\tID\t".
                  get_string('fullname')."\t".get_string('shortname')."\t".get_string('category')."\t".
                  get_string('idnumber')."\t".get_string('summary')."\t".get_string('delete')."\n";
-        }
-        else {
-            echo '<table id="ccresults" class="generaltable boxaligncenter flexible-wrap" summary="'.get_string('uploadcoursesresult', 'tool_uploadcourse').'">';
+        } else {
+            echo '<table id="ccresults" class="generaltable boxaligncenter flexible-wrap" summary="'.
+                  get_string('uploadcoursesresult', 'tool_uploadcourse').'">';
             echo '<tr class="heading r0">';
             echo '<th class="header c'.$ci++.'" scope="col">'.get_string('status').'</th>';
             echo '<th class="header c'.$ci++.'" scope="col">'.get_string('cccsvline', 'tool_uploadcourse').'</th>';
@@ -1075,7 +1065,7 @@ class cc_progress_tracker {
      */
     public function flush() {
         if (empty($this->_row) or empty($this->_row['line']['normal'])) {
-            // Nothing to print - each line has to have at least number
+            // Nothing to print - each line has to have at least number.
             $this->_row = array();
             foreach ($this->columns as $col) {
                 $this->_row[$col] = array('normal'=>'', 'info'=>'', 'warning'=>'', 'error'=>'');
@@ -1085,8 +1075,8 @@ class cc_progress_tracker {
         $ci = 0;
         $ri = 1;
         echo $this->_plain ? "" : '<tr class="r'.$ri.'">';
-        foreach ($this->_row as $key=>$field) {
-            foreach ($field as $type=>$content) {
+        foreach ($this->_row as $key => $field) {
+            foreach ($field as $type => $content) {
                 if ($field[$type] !== '') {
                     $field[$type] = $this->_plain ? $field[$type] : '<span class="cc'.$type.'">'.$field[$type].'</span>';
                 } else {
@@ -1117,7 +1107,7 @@ class cc_progress_tracker {
      */
     public function track($col, $msg, $level = 'normal', $merge = true) {
         if (empty($this->_row)) {
-            $this->flush(); //init arrays
+            $this->flush(); // Init arrays.
         }
         if (!in_array($col, $this->columns)) {
             debugging('Incorrect column:'.$col);
@@ -1165,17 +1155,17 @@ function cc_validate_course_upload_columns(csv_import_reader $cir, $stdfields, m
         print_error('csvfewcolumns', 'error', $returnurl);
     }
 
-    // test columns
+    // Test columns.
     $processed = array();
-    foreach ($columns as $key=>$unused) {
+    foreach ($columns as $key => $unused) {
         $field = $columns[$key];
         $lcfield = textlib::strtolower($field);
         if (in_array($field, $stdfields) or in_array($lcfield, $stdfields)) {
-            // standard fields are only lowercase
+            // Standard fields are only lowercase.
             $newfield = $lcfield;
 
         } else if (preg_match('/^\w+\_\d+$/', $lcfield)) {
-            // special fields for enrolments
+            // Special fields for enrolments.
             $newfield = $lcfield;
 
         } else {
@@ -1246,7 +1236,7 @@ function cc_increment_idnumber($idnumber) {
  */
 function cc_process_template($template, $course) {
     if (is_array($template)) {
-        // hack for for support of text editors with format
+        // Hack for for support of text editors with format.
         $t = $template['text'];
     } else {
         $t = $template;
@@ -1264,7 +1254,7 @@ function cc_process_template($template, $course) {
     $result = preg_replace_callback('/(?<!%)%([+-~])?(\d)*([flu])/', $callback, $t);
 
     if (is_null($result)) {
-        return $template; //error during regex processing??
+        return $template; // Error during regex processing??
     }
 
     if (is_array($template)) {
@@ -1312,5 +1302,4 @@ function cc_process_template_callback($shortname, $fullname, $idnumber, $block) 
 
     return $repl;
 }
-
 
