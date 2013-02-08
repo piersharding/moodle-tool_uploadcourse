@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-if (has_capability('moodle/site:uploadusers', $systemcontext)) {
+if (has_capability('moodle/restore:restorecourse', $systemcontext)) {
     $ADMIN->add('courses', new admin_externalpage('tooluploadcourse',
                 get_string('uploadcourses', 'tool_uploadcourse'),
                 "$CFG->wwwroot/$CFG->admin/tool/uploadcourse/index.php", 'moodle/site:uploadusers'));
