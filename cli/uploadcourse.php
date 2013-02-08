@@ -236,7 +236,7 @@ $formdata = (object) $options;
 
 $returnurl = new moodle_url('/admin/tool/uploadcourse/index.php');
 $bulknurl  = new moodle_url('/admin/tool/uploadcourse/index.php');
-$std_fields = cc_std_fields();
+$std_fields = tool_uploadcourse_std_fields();
 
 // Emulate normal session.
 cron_setup_user();
@@ -245,7 +245,7 @@ $content = file_get_contents($formdata->file);
 $iid = csv_import_reader::get_new_iid('uploadcourse');
 $cir = new csv_import_reader($iid, 'uploadcourse');
 $readcount = $cir->load_csv_content($content, $formdata->encoding, $formdata->delimiter);
-$filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
+$filecolumns = tool_uploadcourse_validate_course_upload_columns($cir, $std_fields, $returnurl);
 unset($content);
 if ($readcount === false) {
     print_error('csvfileerror', 'tool_uploadcourse', $returnurl, $cir->get_error());
@@ -254,6 +254,6 @@ if ($readcount === false) {
 }
 echo "CSV read count: ".$readcount."\n";
 
-$result = cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile, true);
+$result = tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, $restorefile, true);
 
 exit($result);

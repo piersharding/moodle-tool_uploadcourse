@@ -48,7 +48,7 @@ define('CC_BULK_NONE', 0);
 /**
  * Return the list of stad fields the course upload processes
  */
-function cc_std_fields() {
+function tool_uploadcourse_std_fields() {
     // Array of all valid fields for validation.
     return $std_fields = array('fullname', 'shortname', 'category', 'idnumber', 'summary',
                     'format', 'showgrades', 'newsitems', 'teacher', 'editingteacher', 'student', 'modinfo',
@@ -77,10 +77,10 @@ function cc_std_fields() {
  * @param string $restorefile - file to restore from
  * @param boolean $plain - plain text output
  */
-function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=null, $plain=false) {
+function tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, $restorefile=null, $plain=false) {
     global $CFG, $USER, $OUTPUT, $SESSION, $DB;
 
-    $std_fields = cc_std_fields();
+    $std_fields = tool_uploadcourse_std_fields();
 
     @set_time_limit(60*60); // 1 hour should be enough.
     raise_memory_limit(MEMORY_HUGE);
@@ -204,7 +204,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
     $linenum = 1; // Column header is first line.
 
     // Init upload progress tracker.
-    $upt = new cc_progress_tracker($plain);
+    $upt = new tool_uploadcourse_progress_tracker($plain);
     $upt->start(); // Start table.
 
     while ($line = $cir->next()) {
@@ -328,7 +328,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             }
             // We require shortname too - we might use template for it though.
             if (empty($course->shortname) and !empty($formdata->ccshortname)) {
-                $course->shortname = cc_process_template($formdata->ccshortname, $course);
+                $course->shortname = tool_uploadcourse_process_template($formdata->ccshortname, $course);
                 $upt->track('shortname', s($course->shortname));
             }
         }
@@ -353,10 +353,10 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
 
         // Find out in shortname incrementing required.
         if ($existingcourse and $optype == CC_COURSE_ADDINC) {
-            $course->shortname = cc_increment_shortname($course->shortname);
+            $course->shortname = tool_uploadcourse_increment_shortname($course->shortname);
             if (!empty($course->idnumber)) {
                 $oldidnumber = $course->idnumber;
-                $course->idnumber = cc_increment_idnumber($course->idnumber);
+                $course->idnumber = tool_uploadcourse_increment_idnumber($course->idnumber);
                 if ($course->idnumber !== $oldidnumber) {
                     $upt->track('idnumber', s($oldidnumber).'-->'.s($course->idnumber), 'info');
                 }
@@ -397,7 +397,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
             } else {
                 // Process templates.
                 if (isset($formdata->{"cc".$field}) && !empty($formdata->{"cc".$field}) && empty($course->$field)) {
-                    $course->$field = cc_process_template($formdata->{"cc".$field}, $course);
+                    $course->$field = tool_uploadcourse_process_template($formdata->{"cc".$field}, $course);
                 }
             }
         }
@@ -1021,7 +1021,7 @@ function cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile=nu
  * @copyright  2007 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class cc_progress_tracker {
+class tool_uploadcourse_progress_tracker {
     /** @var int $_row - row marker */
     private $_row;
     /** @var array $columns - output columns */
@@ -1149,7 +1149,7 @@ class cc_progress_tracker {
  * @param moodle_url $returnurl return url in case of any error
  * @return array list of fields
  */
-function cc_validate_course_upload_columns(csv_import_reader $cir, $stdfields, moodle_url $returnurl) {
+function tool_uploadcourse_validate_course_upload_columns(csv_import_reader $cir, $stdfields, moodle_url $returnurl) {
     $columns = $cir->get_columns();
 
     if (empty($columns)) {
@@ -1198,7 +1198,7 @@ function cc_validate_course_upload_columns(csv_import_reader $cir, $stdfields, m
  * @param string $shortname
  * @return incremented shortname which does not exist yet
  */
-function cc_increment_shortname($shortname) {
+function tool_uploadcourse_increment_shortname($shortname) {
     global $DB, $CFG;
 
     if (!preg_match_all('/(.*?)([0-9]+)$/', $shortname, $matches)) {
@@ -1208,7 +1208,7 @@ function cc_increment_shortname($shortname) {
     }
 
     if ($DB->record_exists('course', array('shortname'=>$shortname))) {
-        return cc_increment_shortname($shortname);
+        return tool_uploadcourse_increment_shortname($shortname);
     } else {
         return $shortname;
     }
@@ -1220,7 +1220,7 @@ function cc_increment_shortname($shortname) {
  * @param string $idnumber
  * @return incremented idnumber which does not exist yet
  */
-function cc_increment_idnumber($idnumber) {
+function tool_uploadcourse_increment_idnumber($idnumber) {
     global $DB, $CFG;
 
     if (!preg_match_all('/(.*?)([0-9]+)$/', $idnumber, $matches)) {
@@ -1230,7 +1230,7 @@ function cc_increment_idnumber($idnumber) {
     }
 
     if ($DB->record_exists('course', array('idnumber'=>$idnumber))) {
-        return cc_increment_idnumber($idnumber);
+        return tool_uploadcourse_increment_idnumber($idnumber);
     } else {
         return $idnumber;
     }
@@ -1243,7 +1243,7 @@ function cc_increment_idnumber($idnumber) {
  * @return object $template - course template
  * @return string $result - field value
  */
-function cc_process_template($template, $course) {
+function tool_uploadcourse_process_template($template, $course) {
     if (is_array($template)) {
         // Hack for for support of text editors with format.
         $t = $template['text'];
@@ -1258,7 +1258,7 @@ function cc_process_template($template, $course) {
     $fullname   = isset($course->fullname) ? $course->fullname : '';
     $idnumber   = isset($course->idnumber) ? $course->idnumber  : '';
 
-    $callback = partial('cc_process_template_callback', $shortname, $fullname, $idnumber);
+    $callback = partial('tool_uploadcourse_process_template_callback', $shortname, $fullname, $idnumber);
 
     $result = preg_replace_callback('/(?<!%)%([+-~])?(\d)*([flu])/', $callback, $t);
 
@@ -1282,7 +1282,7 @@ function cc_process_template($template, $course) {
  * @param array $block - template parameters
  * @return string $repl - resolved template
  */
-function cc_process_template_callback($shortname, $fullname, $idnumber, $block) {
+function tool_uploadcourse_process_template_callback($shortname, $fullname, $idnumber, $block) {
 
     switch ($block[3]) {
         case 's':

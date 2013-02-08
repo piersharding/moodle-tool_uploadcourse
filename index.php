@@ -40,7 +40,7 @@ admin_externalpage_setup('tooluploadcourse');
 
 $returnurl = new moodle_url('/admin/tool/uploadcourse/index.php');
 $bulknurl  = new moodle_url('/admin/tool/uploadcourse/index.php');
-$std_fields = cc_std_fields();
+$std_fields = tool_uploadcourse_std_fields();
 
 
 if (empty($iid)) {
@@ -61,7 +61,7 @@ if (empty($iid)) {
             print_error('csvemptyfile', 'error', $returnurl, $cir->get_error());
         }
         // Test if columns ok.
-        $filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
+        $filecolumns = tool_uploadcourse_validate_course_upload_columns($cir, $std_fields, $returnurl);
         // Continue to form2.
 
     } else {
@@ -75,7 +75,7 @@ if (empty($iid)) {
     }
 } else {
     $cir = new csv_import_reader($iid, 'uploadcourse');
-    $filecolumns = cc_validate_course_upload_columns($cir, $std_fields, $returnurl);
+    $filecolumns = tool_uploadcourse_validate_course_upload_columns($cir, $std_fields, $returnurl);
 }
 
 $frontpagecontext = context_course::instance(SITEID);
@@ -104,7 +104,7 @@ if ($formdata = $mform2->is_cancelled()) {
     }
     $bulk              = isset($formdata->ccbulk) ? $formdata->ccbulk : 0;
 
-    cc_process_course_upload($formdata, $cir, $filecolumns, $restorefile);
+    tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, $restorefile);
 
     echo $OUTPUT->box_end();
 
