@@ -861,7 +861,8 @@ function tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, 
                 $plugin = null;
                 if (empty($instance)) {
                     $plugin = $enrolmentplugins[$method['enrolmethod']];
-                    $instance = $plugin->add_default_instance($course);
+                    $instance = new stdClass();
+                    $instance->id = $plugin->add_default_instance($course);
                     $instance->roleid = $plugin->get_config('roleid');
                 } else {
                     $plugin = $enrolmentplugins[$instance->enrol];
