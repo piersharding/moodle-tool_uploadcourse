@@ -193,6 +193,7 @@ function tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, 
     $renameerrors  = 0;
     $coursesskipped  = 0;
     $enrolmentplugins = enrol_get_plugins(false);
+    $courseformats = array_keys(get_plugin_list('format'));
 
     // Clear bulk selection.
     if ($bulk) {
@@ -525,6 +526,13 @@ function tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, 
         }
 
         if ($skip) {
+            continue;
+        }
+
+        // check the format
+        if (!empty($course->format) && !in_array($course->format, $courseformats)) {
+            $upt->track('status', get_string('incorrectformat', 'tool_uploadcourse'), 'error');
+            $courseserrors++;
             continue;
         }
 
