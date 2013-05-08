@@ -113,6 +113,7 @@ $string['ccshortnametemplate'] = 'Shortname template';
 $string['ccfullnametemplate'] = 'Fullname template';
 $string['ccidnumbertemplate'] = 'Idnumber template';
 $string['missingtemplate'] = 'Template not found';
+$string['missing'] = 'missing';
 $string['incorrectformat'] = 'Invalid format specified';
 $string['incorrecttemplatefile'] = 'Template file not found';
 $string['invalidenrolmethod'] = 'Invalid enrolment method';

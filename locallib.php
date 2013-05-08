@@ -71,7 +71,7 @@ function tool_uploadcourse_std_fields() {
 /**
  * process the upload
  *
- * @param object $formdata - object of the form data 
+ * @param object $formdata - object of the form data
  * @param object $cir - object of the CSV importer
  * @param array $filecolumns - file column definitions
  * @param string $restorefile - file to restore from
@@ -244,7 +244,7 @@ function tool_uploadcourse_process_course_upload($formdata, $cir, $filecolumns, 
                 // Does the category exist - does the category hierachy make sense.
                 $category = $DB->get_record('course_categories', array('name'=>trim($cat), 'parent' => $course->category));
                 if (empty($category)) {
-                    $upt->track('status', get_string('invalidvalue', 'tool_uploadcourse', 'category'), 'error');
+                    $upt->track('status', get_string('invalidvalue', 'tool_uploadcourse', 'category').' ('.$cat.' '.get_string('missing', 'tool_uploadcourse').')', 'error');
                     $upt->track('category', $errorstr, 'error');
                     $error = true;
                     break;
