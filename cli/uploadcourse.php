@@ -185,12 +185,13 @@ if ($options['category']) {
     }
     $options['cccategory'] = $options['category'];
 } else {
-    $category = $DB->get_record('course_categories', array('id'=> 1));
-    if (empty($category)) {
+    $categories = $DB->get_records('course_categories');
+    if (empty($categories)) {
         echo get_string('invalidcategory', 'tool_uploadcourse')."\n";
         echo $help;
         die;
     }
+    $category = array_shift($categories);
     $options['cccategory'] = $category->id;
 }
 
