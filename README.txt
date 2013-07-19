@@ -1,6 +1,13 @@
 moodle-tool_uploadcourse
 ========================
 
+**NOTE**
+
+This plugin is now available in Moodle core as of 2.6.
+
+
+
+
 Is a Moodle admin/tools plugin for uploading course outlines
 in much the same way that admin/tools/uploaduser works for users.
 These plugins became available from Moodle 2.2x and onwards, as
