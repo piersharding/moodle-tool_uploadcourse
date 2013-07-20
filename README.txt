@@ -43,7 +43,7 @@ The basic process is:
 Download https://gitorious.org/moodle-tool_uploadcourse/moodle-tool_uploadcourse/archive-tarball/master
 unpack the file (probably called master) with tar -xzvf master
 This will give you a directory called moodle-tool_uploadcourse-moodle-tool_uploadcourse
-Move this directory and rename it into it's final position:
+Move this directory and rename it into its final position:
 mv moodle-tool_uploadcourse-moodle-tool_uploadcourse <Moodle dirroot>/admin/tool/uploadcourse
 
 Alternatively you can use git:
